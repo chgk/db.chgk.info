@@ -1,0 +1,123 @@
+#!/usr/bin/perl
+
+
+$base          = $ENV{'DBNAME'}||'chgk'; 
+$dir='result/';
+
+$debug=0;
+
+$dictdir       =  "dict/";
+
+$authorsfile   =  "${dictdir}authors";
+
+$editorsfile   =  "${dictdir}authors";
+
+$nicksfile     =  "${dictdir}nicks";
+
+$rating_players_file = "${dictdir}rating_players.txt";
+
+$ssnicksfile   =  "${dictdir}ssnicks";
+
+$maxqsize      = 3;  #максимальный размер учитываемых закавыченных фраз
+
+$maxwsize      = 30;  #максимальный размер учитываемых слов
+
+
+$DUMPDIR = $ENV{DUMPDIR} || "dump";
+
+$stderr        = "$DUMPDIR/errors";
+
+$unknown       = "$DUMPDIR/unknown";
+
+$dumprs        = "$DUMPDIR/dumprs";
+
+$warnings      = "$DUMPDIR/warnings";
+
+$in2out        = "$DUMPDIR/in2out";
+
+$minstop=200000;
+
+$qnumber       = 1000000000; # обрабатываются вопросы, ID которых меньше чем $qnumber.
+                         # Чтобы обработать все вопросы, просто укажите 
+                         # достаточно большое значение
+
+$newdict       = "${dictdir}ndict.koi";
+
+$kwords        = "${dir}kwords";
+
+$v2k            = "${dir}v2k"; # номер вопроса -> список кл. слов
+
+$k2v            = "${dir}k2v"; # номер ключевых слов -> список  вопросов
+
+$cv2k            = "${dir}cv2k"; # номер вопроса -> список номеров кл. слов
+
+$ck2v            = "${dir}ck2v"; # номер ключевого слова -> список вопросов
+
+$warn            = "${dir}warn"; # варнинги
+
+$kquotes       = "${dir}kquotes";
+
+$ewordlist      = "${dir}ewordlist";
+
+$kwordlist      = "${dir}kwordlist";
+
+$vwordlist      = "${dir}vwordlist"; # Список символосочетаний. Разделители -- пробелы.
+
+$wordlist      = "${dir}wordlist";
+
+$dwordlist     = "${dir}dwordlist";
+
+@dictionaries  = ("${dictdir}dict.koi", "${dictdir}mydict.koi",$newdict);
+
+$newdictionary = 'newdict.koi';
+
+$rules         = 'raff.koi';
+
+$compound_keys = 'compound_keys';
+
+$versions      = "${dir}serrors";
+
+$nf            = "${dir}gwords";
+
+$newnf         = "${dir}newgwords";
+
+$newerrors     = "${dir}newerrors";
+
+$sorterrors    = 'se.pl';
+
+$table         = "${dir}nests";
+
+$newtable      = "${dir}newnests";
+
+$errors        = "${dir}errors";
+
+
+$checkaffix    = 'fw.pl';
+
+$check         = 'check.pl';
+
+$checkword     =  'cw.pl';
+
+$singleaffix   = 'sa.pl';
+
+$info          = "${dir}info";
+
+$often         = 10000;
+
+$seldom        =     0;
+
+$ctable        = "${dir}ctable";
+
+$cnf           = "${dir}cnf";
+
+$proxlimit     = 20;
+
+$equal         = "equall";
+
+$equals       = "${dir}equals.txt"; # имя файла, в который будет записываться 
+                                    # список одинаковых вопросов
+
+$vlist        = "${dir}vlist";     # файл, в который будут писаться списки вопросов, 
+                                   # в которых есть слово
+
+$alike        = "${dir}alike";     #кандидаты на похожесть
