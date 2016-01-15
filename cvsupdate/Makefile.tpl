@@ -1,13 +1,6 @@
 export DB_CHGK_NAME=chgk
-export DB_USERNAME=chgk
-export DB_PASSWORD=ChgK
-
-
-#export HOME=/home/znatoki/chgk-db
-CVS_USER=roma7
-SPHINX_NAME=$(DB_CHGK_NAME)
-SPHINX_PORT=9312
-SPHINX_HOST=localhost
+export HOME=/home/znatoki/chgk-db
+CVS_USER=dsadas
 DOCUMENTROOT=$(HOME)/public_html
 SRCDIR=$(CURDIR)/baza
 DICTDIR=$(CURDIR)/dict
@@ -27,7 +20,6 @@ SEARCHTIMESTAMP= $(DUMPDIR)/search_timestamp_$(DB_CHGK_NAME)
 AUTHORSTIMESTAMP=$(DUMPDIR)/authors_timestamp_$(DB_CHGK_NAME)
 ALLTIMESTAMP=$(DUMPDIR)/all_timestamp_$(DB_CHGK_NAME)
 RATINGTIMESTAMP=$(DUMPDIR)/rating_timestamp_$(DB_CHGK_NAME)
-INITED=$(DUMPDIR)/inited
 
 TEXTS=$(wildcard $(SRCDIR)/*.txt)
 IMAGES=$(wildcard $(IMAGEDIR)/*.gif) $(wildcard $(IMAGEDIR)/*.jpg)
@@ -41,15 +33,15 @@ TOURSINDEXEDFILE=$(INSTALLSCRIPTS)/.$(DB_CHGK_NAME)_tournaments_indexed
 
 all: update_index fill_questions copy_images copy_sounds copy_attachments updateauthors updatedate $(QUESTIONSINDEXEDFILE)
 
-rebuild: $(INITED)
+rebuild:
 	perl $(CURDIR)/mkdb.pl 
-	$(CVS) checkout baza
+	$(CVS) update baza/index
 	rm -f $(INDEXTIMESTAMP)
+	$(CVS) checkout baza
 	$(MAKE) $(INDEXTIMESTAMP)
 	$(CURDIR)/updatedb.pl baza/*.txt
 	touch $(TEXTTIMESTAMP)
 	$(MAKE) find_created
-	$(CVS) checkout dict
 	rm -f $(RATINGTIMESTAMP)
 	$(MAKE) $(RATINGTIMESTAMP)
 	$(MAKE) reindexquestions
@@ -62,9 +54,8 @@ rebuild: $(INITED)
 	rm -f $(ALLTIMESTAMP)
 	$(MAKE) updatedate
 
-$(INITED):
-	$(CVS) login -p
-	touch $(INITED)
+init:
+	$(CVS) login
 	
 update_index: 
 	$(CVS) update baza/index

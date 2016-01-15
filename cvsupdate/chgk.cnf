@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 
-$base          = $ENV{'DBNAME'}||'chgk'; 
+$base          = $ENV{'DB_CHGK_NAME'}||'chgk'; 
 $dir='result/';
 
 $debug=0;

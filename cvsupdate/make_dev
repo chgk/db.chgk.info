@@ -1,1 +1,1 @@
-make DBNAME=chgk_dev DOCUMENT_ROOT=/var/www/db/data/www/dev.baza-voprosov.ru $@
+make DB_CHGK_NAME=chgk_dev DOCUMENT_ROOT=/var/www/db/data/www/dev.baza-voprosov.ru $@

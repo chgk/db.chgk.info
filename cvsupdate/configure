@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ ! -f Makefile ]; then
+    cp Makefile.default Makefile
+fi
+
+read -p "CVS user: " CVS_USER
+sed -i "s/CVS_USER=.*/CVS_USER=$CVS_USER/" Makefile
+
+read -p "Database: " DB_NAME
+sed -i "s/DB_CHGK_NAME=.*/DB_CHGK_NAME=$DB_NAME/" Makefile
+
+read -p "Database user: " DB_USER
+sed -i "s/DBUSER=.*/DBUSER=$DB_USER/" Makefile
+
+read -p "Database password: " DB_PASSWORD
+sed -i "s/DBPASS=.*/DBPASS=$DB_PASSWORD/" Makefile
