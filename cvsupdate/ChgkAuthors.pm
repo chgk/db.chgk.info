@@ -32,7 +32,6 @@ sub readEntities() {
   getbase('QuestionId','Authors');
   while ( ($QuestionId, $author)=getrow, $QuestionId )
   {
-    print STDERR "$QuestionId\n";
     $j++;
     next unless $author;
     print "." unless $i++ % 100;

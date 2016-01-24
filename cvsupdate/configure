@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -f Makefile ]; then
-    cp Makefile.default Makefile
+    cp Makefile.tpl Makefile
 fi
 
 read -p "CVS user: " CVS_USER

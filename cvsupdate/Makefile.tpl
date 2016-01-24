@@ -1,25 +1,32 @@
-export DB_CHGK_NAME=chgk
-export HOME=/home/znatoki/chgk-db
-CVS_USER=dsadas
-DOCUMENTROOT=$(HOME)/public_html
+export DB_CHGK_NAME=
+export DB_USERNAME=
+export DB_USERPASS=
+export WORKDIR=$(CURDIR)/dump
+export CNF=empty
+export SPHINX_DIR=$(WORKDIR)/sphinx
+export SPHINX_NAME=$(DB_CHGK_NAME)
+export SPHINX_PORT=9312
+export DOCUMENT_ROOT=$(HOME)/public_html
+CVS_USER=
+SPHINX_HOST=localhost
 SRCDIR=$(CURDIR)/baza
 DICTDIR=$(CURDIR)/dict
 IMAGEDIR=$(SRCDIR)/images
 SOUNDDIR=$(SRCDIR)/sounds
 ATTDIR=$(SRCDIR)/attachments
-DESTIMAGEDIR=$(DOCUMENTROOT)/images/db
-DESTSOUNDDIR=$(DOCUMENTROOT)/sounds/db
-DESTATTDIR=$(DOCUMENTROOT)/attachments
-DUMPDIR=$(CURDIR)/dump
-INDEXTIMESTAMP= $(DUMPDIR)/index_timestamp_$(DB_CHGK_NAME)
-TEXTTIMESTAMP= $(DUMPDIR)/text_timestamp_$(DB_CHGK_NAME)
-IMAGETIMESTAMP= $(DUMPDIR)/image_timestamp_$(DB_CHGK_NAME)
-SOUNDTIMESTAMP= $(DUMPDIR)/sound_timestamp_$(DB_CHGK_NAME)
-ATTTIMESTAMP= $(DUMPDIR)/att_timestamp_$(DB_CHGK_NAME)
-SEARCHTIMESTAMP= $(DUMPDIR)/search_timestamp_$(DB_CHGK_NAME)
-AUTHORSTIMESTAMP=$(DUMPDIR)/authors_timestamp_$(DB_CHGK_NAME)
-ALLTIMESTAMP=$(DUMPDIR)/all_timestamp_$(DB_CHGK_NAME)
-RATINGTIMESTAMP=$(DUMPDIR)/rating_timestamp_$(DB_CHGK_NAME)
+DESTIMAGEDIR=$(DOCUMENT_ROOT)/images/db
+DESTSOUNDDIR=$(DOCUMENT_ROOT)/sounds/db
+DESTATTDIR=$(DOCUMENT_ROOT)/attachments
+INDEXTIMESTAMP= $(WORKDIR)/index_timestamp_$(DB_CHGK_NAME)
+TEXTTIMESTAMP= $(WORKDIR)/text_timestamp_$(DB_CHGK_NAME)
+IMAGETIMESTAMP= $(WORKDIR)/image_timestamp_$(DB_CHGK_NAME)
+SOUNDTIMESTAMP= $(WORKDIR)/sound_timestamp_$(DB_CHGK_NAME)
+ATTTIMESTAMP= $(WORKDIR)/att_timestamp_$(DB_CHGK_NAME)
+SEARCHTIMESTAMP= $(WORKDIR)/search_timestamp_$(DB_CHGK_NAME)
+AUTHORSTIMESTAMP=$(WORKDIR)/authors_timestamp_$(DB_CHGK_NAME)
+ALLTIMESTAMP=$(WORKDIR)/all_timestamp_$(DB_CHGK_NAME)
+RATINGTIMESTAMP=$(WORKDIR)/rating_timestamp_$(DB_CHGK_NAME)
+INITED=$(WORKDIR)/inited
 
 TEXTS=$(wildcard $(SRCDIR)/*.txt)
 IMAGES=$(wildcard $(IMAGEDIR)/*.gif) $(wildcard $(IMAGEDIR)/*.jpg)
@@ -31,33 +38,55 @@ INSTALLSCRIPTS=$(CURDIR)/../install
 QUESTIONSINDEXEDFILE=$(INSTALLSCRIPTS)/.$(DB_CHGK_NAME)_questions_indexed
 TOURSINDEXEDFILE=$(INSTALLSCRIPTS)/.$(DB_CHGK_NAME)_tournaments_indexed
 
+
 all: update_index fill_questions copy_images copy_sounds copy_attachments updateauthors updatedate $(QUESTIONSINDEXEDFILE)
 
-rebuild:
+rebuild: $(INITED)
 	perl $(CURDIR)/mkdb.pl 
-	$(CVS) update baza/index
-	rm -f $(INDEXTIMESTAMP)
 	$(CVS) checkout baza
+	rm -f $(INDEXTIMESTAMP)
 	$(MAKE) $(INDEXTIMESTAMP)
 	$(CURDIR)/updatedb.pl baza/*.txt
 	touch $(TEXTTIMESTAMP)
 	$(MAKE) find_created
+	$(CVS) checkout dict
 	rm -f $(RATINGTIMESTAMP)
 	$(MAKE) $(RATINGTIMESTAMP)
-	$(MAKE) reindexquestions
-	$(CVS) checkout baza/images
-	cp $(IMAGEDIR)/*.* $(DESTIMAGEDIR)
-	$(CVS) checkout baza/sounds
-	cp $(SOUNDDIR)/*.* $(DESTSOUNDDIR)
 	rm -f $(AUTHORSTIMESTAMP)
 	$(MAKE) $(AUTHORSTIMESTAMP)
+	$(MAKE) reindexquestions
 	rm -f $(ALLTIMESTAMP)
 	$(MAKE) updatedate
+	$(MAKE) deploy_static
 
-init:
-	$(CVS) login
-	
-update_index: 
+deploy_static: | $(DESTIMAGEDIR) $(DESTSOUNDDIR)
+	find $(IMAGEDIR) -type f -exec cp {} $(DESTIMAGEDIR)/ \; 
+	find $(SOUNDDIR) -type f -exec cp {} $(DESTSOUNDDIR)/ \; 
+
+$(WORKDIR):
+	mkdir $(WORKDIR)
+
+$(DESTIMAGEDIR):
+	mkdir -p $(DESTIMAGEDIR)	
+
+$(DESTSOUNDDIR):
+	mkdir -p $(DESTSOUNDDIR)	
+
+$(INITED): | $(WORKDIR)
+	$(CVS) login -p
+	touch $(INITED)
+
+$(SPHINX_DIR): | $(WORKDIR)
+	mkdir $(SPHINX_DIR)
+
+init_sphinx:
+	$(INSTALLSCRIPTS)/make_sphinx_conf
+
+start_sphinx:
+	$(INSTALLSCRIPTS)/start_sphinx
+stop_sphinx:
+	$(INSTALLSCRIPTS)/stop_sphinx
+update_index:
 	$(CVS) update baza/index
 	$(MAKE) $(INDEXTIMESTAMP)
 
@@ -109,8 +138,8 @@ $(ALLTIMESTAMP): $(IMAGETIMESTAMP) $(SOUNDTIMESTAMP) $(ATTTIMESTAMP) $(TEXTTIMES
 	touch $(ALLTIMESTAMP)
 	
 find_created: 
-	cd $(SRCDIR) && cvs log -l -r1.1 *.txt >$(DUMPDIR)/cvs_log.txt 
-	$(CURDIR)/find_created.pl $(DUMPDIR)/cvs_log.txt >x
+	cd $(SRCDIR) && cvs log -l -r1.1 *.txt >$(WORKDIR)/cvs_log.txt 
+	$(CURDIR)/find_created.pl $(WORKDIR)/cvs_log.txt >x
 
 $(QUESTIONSINDEXEDFILE): $(TEXTTIMESTAMP) $(RATINGTIMESTAMP)
 	$(MAKE) reindexquestions
@@ -134,8 +163,8 @@ $(AUTHORSTIMESTAMP): dict/nicks dict/authors $(TEXTTIMESTAMP) $(INDEXTIMESTAMP)
 	$(MAKE) people
 	
 people:
-	perl makepeople.pl
-	perl makeeditors.pl
+#	perl makepeople.pl
+#	perl makeeditors.pl
 	perl makeauthors.pl
 	touch $(AUTHORSTIMESTAMP)
 

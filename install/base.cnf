@@ -1,0 +1,70 @@
+#!/bin/bash
+if [ ! -n "$DB_CHGK_NAME" ] 
+then
+	DB_CHGK_NAME=chgk
+fi 
+if [ ! -n "$DB_CHGK_DRUPAL_NAME" ] 
+then
+	DB_CHGK_DRUPAL_NAME=chgk_drupal
+fi 
+
+if [ ! -n "$SPHINX_NAME" ] 
+then 
+	SPHINX_NAME=chgk
+fi 
+
+if [ ! -n "$WORK_DIR" ]
+then  
+    pushd `dirname $0`;
+    WORK_DIR=`pwd`
+    popd
+fi
+
+if [ ! -n "$DUMP_DIR" ]
+then 
+    DUMP_DIR=$WORK_DIR/dumps
+fi 
+
+if [ ! -n "$TEMP_DIR" ]
+then 
+    TEMP_DIR=$WORK_DIR/temp
+    LOG_DIR=$WORK_DIR/log
+fi 
+
+if [ ! -n "$SVN_URL" ]
+then 
+    SVN_URL=http://svn.baza-voprosov.ru/db
+fi 
+
+if [ ! -n "$DB_CHGK_DUMP" ] 
+then
+    DB_CHGK_DUMP=http://baza-voprosov.ru/dumps/chgk.sql.gz
+fi
+
+if [ ! -n "$DB_CHGK_DRUPAL_DUMP" ]
+then 
+    DB_CHGK_DRUPAL_DUMP=http://baza-voprosov.ru/dumps/chgk_drupal.sql.gz
+fi
+
+if [ ! -n "$IMAGE_DOMAIN" ]
+then 
+    IMAGE_DOMAIN=db.chgk.info
+fi 
+
+if [ ! -n "$IMAGE_DOMAIN" ]
+then 
+	INSTALL_IMAGES=0
+fi 
+
+if [ ! -n "$DB_HOSTNAME" ]
+then 
+    DB_HOSTNAME=localhost
+fi 
+
+if [ ! -n "$SPHINX_DIR" ]
+then
+	SPHINX_DIR=$WORK_DIR/sphinx
+fi 
+
+SVN_USERNAME=
+SVN_PASSWORD=

@@ -34,7 +34,9 @@ use vars qw(@ISA @EXPORT);
 my $z;
 my $qbase;
 BEGIN {do "chgk.cnf"; 	
-          $qbase = DBI -> connect ("DBI:mysql:$base",'chgk','ChgK');
+          $qbase = DBI -> connect ("DBI:mysql:$base",
+		$ENV{'DB_USERNAME'}||'chgk',
+		exists($ENV{'DB_USERPASS'})?$ENV{'DB_USERPASS'}:'ChgK');
 	  $qbase->do("SET NAMES koi8r");
       };
 
@@ -176,12 +178,15 @@ sub addquestions2author
   my $kvo=scalar grep {!$forbidden->{$_}} @$questions;
   addauthor($p);
   $qbase->do( $sql = "UPDATE People SET QNumber=$kvo WHERE CharId=".$qbase->quote( $p->{nick} ) );
+  my @pairs = ();
   foreach my $q (@{$questions})
   {
-    $query="insert into P2Q (Author,Question) 
-                values (".$qbase->quote($p->{nick}).",$q)";
-    $qbase -> do($query) ;
+    push @pairs, "(".$qbase->quote($p->{nick}).",$q)";
   }
+  my $s = join ",", @pairs;
+  $query="insert into P2Q (Author,Question) values $s"; 
+  $qbase -> do($query) ;
+  
 }
 
 sub addtours2author

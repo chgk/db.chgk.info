@@ -1,0 +1,26 @@
+#!/bin/bash 
+
+source `dirname $0`/config.inc
+TABLES="questions tournaments unsorted"
+LOG=$LOG_DIR/indexer_log 
+PID=$WORK_DIR/.indexer_cron.pid
+echo ... >>$LOG
+if [ -f $PID ] 
+    then
+	exit 1
+fi 
+echo $$ >  $PID
+chown $OWNER $PID
+for a in $TABLES
+do
+    INDEX_NAME="$SPHINX_NAME"_$a
+    PID_NAME="$WORK_DIR/.$INDEX_NAME"_indexed
+    echo $PID_NAME
+    if [ ! -f $PID_NAME ]
+	then 
+		echo ==========  $INDEX_NAME ============ >>$LOG
+		date >> $LOG
+		indexer --rotate $INDEX_NAME >>$LOG && touch $PID_NAME && chown $OWNER $PID_NAME
+    fi
+done
+rm -f $PID

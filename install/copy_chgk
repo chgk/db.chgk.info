@@ -1,0 +1,47 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+
+if [  -d $DOCUMENT_ROOT/sites/default ]
+  then
+    echo -n Chmod sites/default
+    chmod 777 $DOCUMENT_ROOT/sites/default
+    source $SETUP_FOLDER/check_success "Chmod sites/default";
+fi
+
+
+echo -n Copy CHGK package...
+#cp -r $WWW_SOURCE_DIR/* $DOCUMENT_ROOT
+$SVN_EXECUTABLE_FULL $SVN_URL/www/ $DOCUMENT_ROOT
+source $SETUP_FOLDER/check_success "Can not install CHGK package";
+
+echo -n Updating settings.php... 
+$SED_EXECUTABLE "s/\$db_url =.*/\$db_url = 'mysqli:\/\/$DB_USERNAME:$DB_USERPASS@$DB_HOSTNAME\/$DB_CHGK_DRUPAL_NAME';/g" $DOCUMENT_ROOT/sites/default/settings.php
+source $SETUP_FOLDER/check_success $DOCUMENT_ROOT/sites/default/settings.php is updated
+
+
+echo -n Updating db_settings.php -- chgk_db... 
+$SED_EXECUTABLE  "s/\$conf\['chgk_db'\] = .*/\$conf['chgk_db'] = '$DB_CHGK_NAME';/g" $DOCUMENT_ROOT/sites/default/db_settings.php
+source $SETUP_FOLDER/check_success $DOCUMENT_ROOT/sites/default/db_settings.php can not be  updated
+
+echo -n Updating db_settings.php -- sphinx_name... 
+$SED_EXECUTABLE "s/\$conf\['sphinx_index'\] = .*/\$conf['sphinx_index'] = '$SPHINX_NAME';/g" $DOCUMENT_ROOT/sites/default/db_settings.php
+source $SETUP_FOLDER/check_success $DOCUMENT_ROOT/sites/default/db_settings.php can not be  updated
+
+echo -n Updating db_settings.php -- sphinx_port... 
+$SED_EXECUTABLE "s/\$conf\['sphinx_port'\] = .*/\$conf['sphinx_port'] = $SPHINX_PORT;/g" $DOCUMENT_ROOT/sites/default/db_settings.php
+source $SETUP_FOLDER/check_success $DOCUMENT_ROOT/sites/default/db_settings.php can not be  updated
+
+echo -n Updating db_settings.php -- sphinx_host... 
+$SED_EXECUTABLE "s/\$conf\['sphinx_host'\] = .*/\$conf['sphinx_host'] = '$SPHINX_HOST';/g" $DOCUMENT_ROOT/sites/default/db_settings.php
+source $SETUP_FOLDER/check_success $DOCUMENT_ROOT/sites/default/db_settings.php can not be  updated
+
+
+echo -n Updating db_settings.php -- image_domain... 
+$SED_EXECUTABLE "s/\$conf\['image_domain'\] = .*/\$conf['image_domain'] = '$IMAGE_DOMAIN';/g" $DOCUMENT_ROOT/sites/default/db_settings.php
+source $SETUP_FOLDER/check_success $DOCUMENT_ROOT/sites/default/db_settings.php can not be  updated
+
+echo -n Changing permissions of $DOCUMENT_ROOT/sites/default ...
+chmod 555 $DOCUMENT_ROOT/sites/default
+source $SETUP_FOLDER/check_success "Can not change permissions";

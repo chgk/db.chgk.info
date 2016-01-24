@@ -1,0 +1,14 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+TOURNAMENTS=$(echo set names utf8\;select count\(*\) from Tournaments where Type=\'Ч\' | $MYSQL_EXECUTABLE_FULL --skip-column-names  $DB_CHGK_NAME)
+QUESTIONS=$(echo select count\(*\) from Questions | $MYSQL_EXECUTABLE_FULL --skip-column-names  $DB_CHGK_NAME)
+CHGK=$(echo select count\(*\) from Questions where TypeNum=1| $MYSQL_EXECUTABLE_FULL --skip-column-names  $DB_CHGK_NAME)
+
+PHRASE=$($SETUP_FOLDER/make_mission.php $TOURNAMENTS $QUESTIONS $CHGK)
+#echo update variable SET value =\'$PHRASE\' WHERE name=\'site_mission\' | $MYSQL_EXECUTABLE_FULL   $DB_CHGK_DRUPAL_NAME
+$DRUSH variable-set --yes site_mission "$PHRASE"
+$SETUP_FOLDER/clear_cache $CNF
+
+

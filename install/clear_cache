@@ -1,0 +1,20 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+$DRUSH cc all
+#echo -n Clearing file cache ...
+#rm -rf $DOCUMENT_ROOT/sites/default/files/filecache
+#source $SETUP_FOLDER/check_success Can not clear file cache
+
+#CACHETABLES="cache cache_block cache_bootstrap cache_browscap cache_content cache_filter cache_form \
+#    cache_menu cache_page cache_path cache_update cache_views \
+#    cache_views_data"
+    
+#for t in $CACHETABLES 
+#do
+#    echo -n Truncating $t... 
+#    echo truncate $t  | $MYSQL_EXECUTABLE_FULL $DB_CHGK_DRUPAL_NAME
+#    source $SETUP_FOLDER/check_success "Can not truncate $t";
+#done
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+if [ ! -d "$SPHINX_DIR/$SPHINX_NAME/data" ] 
+    then 
+    echo -n Sphinx folder  does not exist. Creating...
+    mkdir -p $SPHINX_DIR/$SPHINX_NAME/data
+    source $SETUP_FOLDER/check_success "Can not create $SPHINX_DIR/$SPHINX_NAME/data";
+fi
+
+
+DELIMITER=`dd if=/dev/urandom bs=16 count=1 2>/dev/null | base64`
+FILENAME=$SETUP_FOLDER/sphinx.tpl
+echo $SPHINX_LOG_DIR
+export DB_HOSTNAME DB_USERNAME DB_USERPASS DB_CHGK_NAME DB_DRUPAL_NAME SPHINX_NAME DB_CHGK_DRUPAL_NAME SPHINX_DIR SPHINX_PORT SPHINX_HOST
+(echo "cat << $DELIMITER"; cat "$FILENAME"; echo "$DELIMITER") | sh >$SPHINX_DIR/$SPHINX_NAME/sphinx.conf

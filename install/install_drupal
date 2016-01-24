@@ -1,0 +1,101 @@
+#!/bin/bash
+source `dirname $0`/config.inc
+
+
+if [ ! -d $DOCUMENT_ROOT ]
+  then
+    $SETUP_FOLDER/fail "DOCUMENT_ROOT folder $DOCUMENT_ROOT does not exist"
+    exit 1
+fi
+
+
+if [ ! -d $TEMP_DIR/drupal ] 
+  then 
+    echo -n Temp folder for drupal installation  does not exist. Creating...
+    mkdir $TEMP_DIR/drupal
+    source $SETUP_FOLDER/check_success "Can not create $TEMP_DIR/drupal";
+  else 
+    if [ "$(ls -A $TEMP_DIR/drupal)" ] 
+      then
+        echo -n Temp folder for drupal installation is not empty. Clearing...
+        rm -r $TEMP_DIR/drupal/*
+        source $SETUP_FOLDER/check_success "Can clear $TEMP_DIR/drupal";
+    fi
+fi
+    
+    
+echo -n Copy drupal installation archive to $TEMP_DIR/drupal/
+$SVN_EXECUTABLE_FULL $SVN_URL/distrib/ $TEMP_DIR/drupal/
+source $SETUP_FOLDER/check_success "Can not copy";
+
+echo -n Changing current dir to $TEMP_DIR/drupal/
+SUCCESS=0 && pushd $TEMP_DIR/drupal/ >/dev/null && SUCCESS=1
+source $SETUP_FOLDER/check_success "Can not change dir";
+echo -n Extracting archive
+tar -xzf drupal*
+source $SETUP_FOLDER/check_success "Can not extract archive";
+echo -n Copy Drupal to the document root
+cp -r $TEMP_DIR/drupal/drupal*/* $DOCUMENT_ROOT/ 
+source $SETUP_FOLDER/check_success "Can not copy drupal to $DOCUMENT_ROOT"
+
+echo -n Copy Drupal\'s .htaccess  to the document root
+cp -r $TEMP_DIR/drupal/drupal*/.htaccess $DOCUMENT_ROOT/
+source $SETUP_FOLDER/check_success "Can not copy .htaccess to $DOCUMENT_ROOT"
+
+if [ ! -d $DOCUMENT_ROOT/sites/all/modules ]
+  then
+    echo -n Creating folder for modules...
+    mkdir $DOCUMENT_ROOT/sites/all/modules
+    source $SETUP_FOLDER/check_success "Can not create $DOCUMENT_ROOT/sites/all/modules";
+
+fi
+
+
+if [ ! -d $DOCUMENT_ROOT/sites/all/themes ]
+  then
+    echo -n Creating folder for themes...
+    mkdir $DOCUMENT_ROOT/sites/all/themes
+    source $SETUP_FOLDER/check_success "Can not create $DOCUMENT_ROOT/sites/all/themes";
+fi
+
+if [  -d $DOCUMENT_ROOT/sites/default ]
+  then
+    echo -n Chmod sites/default
+    chmod 777 $DOCUMENT_ROOT/sites/default
+    source $SETUP_FOLDER/check_success "Chmod sites/default";
+fi
+
+
+if [ ! -d $DOCUMENT_ROOT/sites/default/files ]
+  then
+    echo -n Creating folder for files...
+    mkdir $DOCUMENT_ROOT/sites/default/files && chmod 644 $DOCUMENT_ROOT/sites/default/files
+    source $SETUP_FOLDER/check_success "Can not create $DOCUMENT_ROOT/sites/default/files";
+fi
+
+echo -n Changing permissions of $DOCUMENT_ROOT/sites/default/files ...
+chmod 777 $DOCUMENT_ROOT/sites/default/files
+source $SETUP_FOLDER/check_success "Can not change permissions";
+
+echo -n Changing permissions of $DOCUMENT_ROOT/sites/default ...
+chmod 555 $DOCUMENT_ROOT/sites/default
+source $SETUP_FOLDER/check_success "Can not change permissions";
+
+
+echo -n Changing current dir to $TEMP_DIR/drupal/modules
+cd $TEMP_DIR/drupal/modules
+source $SETUP_FOLDER/check_success "Can not chdir";
+
+echo  Extracting external modules...
+for  f in *.tar.gz 
+do
+  echo -n $f ...
+  tar -xzf $f 
+  source $SETUP_FOLDER/check_success "Can not extract";
+done 
+
+
+echo -n Installing external modules...
+rm *.tar.gz && cp -r * $DOCUMENT_ROOT/sites/all/modules
+source $SETUP_FOLDER/check_success "Can not install modules";
+

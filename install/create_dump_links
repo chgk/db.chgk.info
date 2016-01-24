@@ -1,0 +1,77 @@
+#!/bin/bash 
+
+source `dirname $0`/config.inc
+
+echo -n Finding last dump...   
+LASTDUMP=`ls -1 -tr $BACKUP_FOLDER/$DB_CHGK_DRUPAL_NAME\.* | tail -1 `
+
+LASTCHGKDUMP=`ls -1 -tr $BACKUP_FOLDER/$DB_CHGK_NAME\.* | tail -1 `
+
+if [ ! -n "$LASTDUMP" ] 
+then 
+  source $SETUP_FOLDER/fail "Can not find last dump"
+fi
+
+echo -n Loading last dump...
+$SETUP_FOLDER/load_db $CNF chgk_temp $LASTDUMP || exit 1
+
+echo -n Changing admin password...
+echo update users set pass=md5\(\'admin\'\) where uid = 1 | $MYSQL_EXECUTABLE_FULL chgk_temp
+source $SETUP_FOLDER/check_success "Can not change admin password"
+
+echo -n Changing other passwords...
+echo update users set pass=md5\(RAND\(\)\) where uid > 1 | $MYSQL_EXECUTABLE_FULL chgk_temp
+source $SETUP_FOLDER/check_success "Can not change admin password"
+
+echo -n Changing emails...
+echo update users set  init=CONCAT\(md5\(RAND\(\)\), \'\@fake.ru\'\), mail=CONCAT\(md5\(RAND\(\)\), \'\@fake.ru\'\) where uid \> 0 | $MYSQL_EXECUTABLE_FULL chgk_temp
+source $SETUP_FOLDER/check_success "Can not change admin password"
+
+echo -n Deleting personal data from profiles...
+echo delete from profile_values  | $MYSQL_EXECUTABLE_FULL chgk_temp
+source $SETUP_FOLDER/check_success "Can not delete personal data"
+
+echo -n Deleting personal data from issues...
+echo UPDATE content_type_chgk_issue SET field_email_value = \'\' | $MYSQL_EXECUTABLE_FULL chgk_temp
+source $SETUP_FOLDER/check_success "Can not delete personal data from issues"
+
+echo update variable set value=\'s:72:\"Зеркало сайта \<a href=\"http://db.chgk.info\"\>db.chgk.info\</a\>\"\;\' where name=\'site_slogan\' | $MYSQL_EXECUTABLE_FULL chgk_temp
+$SETUP_FOLDER/clear_cache $CNF
+
+echo -n Deleting cached data...
+echo delete from profile_values  | $MYSQL_EXECUTABLE_FULL chgk_temp
+
+echo delete from profile_values  | $MYSQL_EXECUTABLE_FULL chgk_temp
+source $SETUP_FOLDER/check_success "Can not delete personal data"
+
+CACHETABLES="cache cache_block cache_bootstrap cache_browscap cache_content cache_filter cache_form \
+    cache_menu cache_page cache_path cache_update cache_views \
+    cache_views_data captcha_sessions  history search_dataset search_index \
+    search_node_links search_total sessions views_object_cache browscap"
+    
+for t in $CACHETABLES 
+do
+    echo -n Truncating $t... 
+    echo truncate $t  | $MYSQL_EXECUTABLE_FULL chgk_temp
+    source $SETUP_FOLDER/check_success "Can not truncate $t";
+done
+
+
+echo -n Creating dump...  
+$MYSQLDUMP_EXECUTABLE_FULL chgk_temp |gzip >$BACKUP_FOLDER/$DB_CHGK_DRUPAL_NAME.sql.gz
+source $SETUP_FOLDER/check_success "Can not create $BACKUP_FOLDER/$DB_CHGK_DRUPAL_NAME.sql.gz"
+
+if [ ! -d $DOCUMENT_ROOT/dumps ] 
+  then 
+    echo -n  Creating $DOCUMENT_ROOT/dumps...
+    mkdir $DOCUMENT_ROOT/dumps
+    source $SETUP_FOLDER/check_success "Can not create $DOCUMENT_ROOT/dumps";
+fi
+
+echo -n Creating link to $LASTCHGKDUMP...  
+ln -s -f $LASTCHGKDUMP $DOCUMENT_ROOT/dumps/$DB_CHGK_NAME.sql.gz
+source $SETUP_FOLDER/check_success "Can not create link $DOCUMENT_ROOT/dumps/$DB_CHGK_NAME.sql.gz to $LASTCHGKDUMP";
+    
+echo -n Creating link to $DB_CHGK_NAME.sql.gz...  
+ln -s -f  $BACKUP_FOLDER/$DB_CHGK_DRUPAL_NAME.sql.gz $DOCUMENT_ROOT/dumps/$DB_CHGK_DRUPAL_NAME.sql.gz
+source $SETUP_FOLDER/check_success "Can not create link to $BACKUP_FOLDER/$DB_CHGK_DRUPAL_NAME.sql.gz";

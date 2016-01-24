@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+source `dirname $0`/config.inc
+
+
+$SETUP_FOLDER/load_chgk_db $1 || exit 1
+$SETUP_FOLDER/load_drupal_db $1 || exit 1
+$SETUP_FOLDER/install_drupal $1 || exit 1
+$SETUP_FOLDER/copy_chgk $1 || exit 1

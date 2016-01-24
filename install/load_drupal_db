@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+rm -f $DUMP_DIR/chgk_drupal.sql.gz
+echo $DB_CHGK_DRUPAL_DUMP
+echo -n "Downloading drupal dump..."
+wget -nv  -O$DUMP_DIR/chgk_drupal.sql.gz $DB_CHGK_DRUPAL_DUMP
+source $SETUP_FOLDER/check_success "Can not download drupal dump"
+
+$SETUP_FOLDER/load_db $CNF $DB_CHGK_DRUPAL_NAME $DUMP_DIR/chgk_drupal.sql.gz
+
+if [  -n "$ADMIN_PASSWORD" ]
+then 
+  echo -n "Changing admin password..."  
+  echo update users set pass=md5\(\'$ADMIN_PASSWORD\'\) where uid = 1 | $MYSQL_EXECUTABLE_FULL $DB_CHGK_DRUPAL_NAME
+fi
+

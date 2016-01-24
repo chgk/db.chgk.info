@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+D=`date`
+#echo "replace  INTO variable ( name, value ) VALUES('update_date', '$S')" | $MYSQL_EXECUTABLE_FULL   $DB_CHGK_DRUPAL_NAME
+$DRUSH variable-set --yes update_date "$D"

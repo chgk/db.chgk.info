@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+echo -n Stopping sphinx daemon... 
+$SEARCHD_EXECUTABLE_FULL --stop
+source $SETUP_FOLDER/check_success "Can not start sphinx daemon";
+

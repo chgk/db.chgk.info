@@ -51,8 +51,11 @@ sub readNicks() {
     next unless $number=~/^\d+$/;
     my $s = <NICKS>;
     $s=~s/\((.*)\)//;
-    my $city = lc $1;
-    $city =~ s/\b(\S)/\u$1/gi;
+    my $city = '';
+    if ($1) {
+    	$city = lc $1;
+    	$city =~ s/\b(\S)/\u$1/gi;
+    }
     my @parts = split ' ',$s;
     $_ = ucfirst lc $_ foreach  @parts;
     my $surname = pop @parts;

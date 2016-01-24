@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $? -ne 0 ] || [ ! -n "$SUCCESS" ]
+    then
+	 $SETUP_FOLDER/fail $@
+         exit 1
+    else 
+        $SETUP_FOLDER/success
+fi 
+	            
+	            

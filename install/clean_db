@@ -1,0 +1,8 @@
+#!/bin/bash 
+
+source `dirname $0`/config.inc
+
+_DB_NAME=$1
+
+$MYSQL_EXECUTABLE_FULL -BNe "show tables" $_DB_NAME | tr '\n' ',' | sed -e 's/,$//' | awk '{print "SET FOREIGN_KEY_CHECKS = 0;DROP TABLE IF EXISTS " $1 ";SET FOREIGN_KEY_CHECKS = 1;"}' | $MYSQL_EXECUTABLE_FULL $_DB_NAME
+source $SETUP_FOLDER/check_success "Can not clean database"

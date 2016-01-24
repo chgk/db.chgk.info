@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+echo -n Reindexing sphinx daemon... 
+$INDEXER_EXECUTABLE_FULL # --rotate
+source $SETUP_FOLDER/check_success "Can not reindex";
+

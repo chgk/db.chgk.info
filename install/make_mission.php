@@ -1,0 +1,40 @@
+#!/usr/bin/php
+<?php
+list ($nothing, $tours, $questions, $chgk) = $argv;
+
+
+print "$tours пакет".suf1($tours).", $questions игров".suf3($questions)." задани".suf2($questions).", из них $chgk вопрос".suf1($chgk)." ЧГК";
+
+function  suf1($hits) {
+    if ( preg_match( '/1.$/', $hits)  ||  preg_match( '/[5-90]$/', $hits ) ) {
+	$suffix = 'ов';
+    } elseif ( preg_match( '/1$/', $hits ) ) {
+	$suffix = '';
+    } else {
+	$suffix = 'а';
+    }
+    return $suffix;
+}
+
+function  suf2( $hits ) {
+    if ( preg_match( '/1.$/', $hits)  ||  preg_match( '/[5-90]$/', $hits ) ) {
+	$suffix = 'й';
+    } elseif ( preg_match( '/1$/', $hits ) ) {
+	$suffix = 'е';
+    } else {
+	$suffix = 'я';
+    }
+    return $suffix;
+}
+
+function suf3( $hits ) {
+    if ( preg_match( '/1.$/', $hits)  ||  preg_match( '/[5-90]$/', $hits ) ) {
+	$suffix = 'ых';
+    } elseif ( preg_match( '/1$/', $hits ) ) {
+	$suffix = 'ое';
+    } else {
+	$suffix = 'ых';
+    }
+    return $suffix;
+
+}

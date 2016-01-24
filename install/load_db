@@ -1,0 +1,27 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+_DB_NAME=$2
+_DB_DUMP=$3
+
+echo "Now we will create $_DB_NAME from dump $_DB_DUMP"
+
+
+BASE_EXIST=`$MYSQL_EXECUTABLE_FULL -e "show databases;" | grep "^$_DB_NAME$"`
+
+if [ -n "$BASE_EXIST" ]
+    then
+	echo -n "Dropping old database $_DB_NAME..."
+	`$MYSQL_EXECUTABLE_FULL -e "drop database $_DB_NAME;"`
+	source $SETUP_FOLDER/check_success "Can not drop database"
+fi
+
+echo -n "Creating $_DB_NAME... "
+$MYSQLADMIN_EXECUTABLE_FULL create $_DB_NAME
+source $SETUP_FOLDER/check_success "Can create database"
+
+echo -n "Loading dump..."
+gunzip -c $_DB_DUMP | $MYSQL_EXECUTABLE_FULL $_DB_NAME 
+source $SETUP_FOLDER/check_success "Can not load dump"
+                                                  

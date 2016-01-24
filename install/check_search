@@ -1,0 +1,11 @@
+#!/bin/bash 
+
+source `dirname $0`/config.inc
+
+ps ax | grep -E '[0-9] searchd'
+RETVAL=$?
+if [ $RETVAL -ne 0 ]; then
+    searchd
+    date >$LOG_FOLDER/search_restarted.log
+fi
+    

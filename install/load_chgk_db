@@ -1,0 +1,12 @@
+#!/bin/bash
+
+source `dirname $0`/config.inc
+
+rm -f $DUMP_DIR/chgk.sql.gz
+
+echo -n "Downloading question dump... "
+wget -nv -P $DUMP_DIR/  $DB_CHGK_DUMP
+source $SETUP_FOLDER/check_success "Can not download question dump"
+
+
+$SETUP_FOLDER/load_db $CNF $DB_CHGK_NAME $DUMP_DIR/chgk.sql.gz
