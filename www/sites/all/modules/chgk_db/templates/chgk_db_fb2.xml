@@ -1,0 +1,44 @@
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>'?>
+<?php setlocale(LC_ALL, 'ru_RU.UTF8');?>
+<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:l="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gribuser.ru/xml/fictionbook/2.0 FictionBook2.1.xsd"> 
+      <description>
+          <title-info>
+              <genre>nonfiction</genre>
+              <author>
+                  <first-name/>
+                   <last-name>База вопросов Интернет-клуба "Что? Где? Когда?"</last-name>
+              </author>
+              <book-title><?php print $tournament->getFullTitle();?></book-title>
+              <?php if ($tournament->hasInfo() || $tournament->hasEditor()) :?><annotation>
+                <?php if ($tournament->hasEditor()) {?>
+                  <p><?php print $tournament->getEditorFb2();?></p>
+                <?php }?>
+                <?php if ($tournament->hasInfo()) :?>
+                    <p>
+                    <?php print $tournament->getInfoFb2()."\n";?>
+                    </p>
+              <?php endif;?>
+               </annotation>
+            <?php endif;?>
+            <date><?php print $tournament->getPlayedAtDate();?></date>
+            <lang>ru</lang>
+        </title-info>
+
+              <document-info>
+                  <author>
+                      <first-name/>
+                      <last-name>База вопросов Интернет-клуба "Что? Где? Когда?"</last-name>
+                   </author>
+                  <program-used>php, Drupal</program-used>
+                  <date value='<?php print strftime("%Y-%m-%d", time());?>'><?php print strftime("%x", time());?></date>
+                  <id><?php print uniqid();?></id>
+                  <version>1.0</version>
+              </document-info>
+      </description>
+      <body>
+          <title><p><?php print $tournament->getTitle();?></p></title>
+              <?php print $tournament->getFb2MainPart();?>
+
+      </body>
+<?php print($tournament->getImagesBinaries());?>
+</FictionBook>

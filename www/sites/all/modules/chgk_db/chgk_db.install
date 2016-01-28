@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * Implementation of hook_install().
+ */
+function chgk_db_install() {
+  // Create tables.
+  drupal_install_schema('chgk_db');
+  $result = db_sql('SELECT n.nid, n.sticky, n.created FROM {node} n WHERE n.type="unsorted"');
+
+  while ($node = db_fetch_object($result)) {
+    db_sql("INSERT INTO {unsorted} (nid, vid) VALUES ({$node->nid}, {$node->vid}");
+  }
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function chgk_db_uninstall() {
+  // Remove tables.
+  drupal_uninstall_schema('unsorted');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function chgk_db_schema() {
+  $schema['unsorted'] = array(
+      'description' => 'Unsorted packages',
+      'fields' => array(
+          'vid' => array(
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+              'default' => 0,
+              'description' => "{node}.vid."
+          ),
+          'nid' => array(
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+              'default' => 0,
+              'description' => "node}.nid."
+          ),
+          'archived' => array(
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+              'default' => 0,
+              'description' => 'Boolean indicating whether or not the package is archived',
+          ),
+          'text_id' => array(
+              'type' => 'char',
+              'length' => 16,
+              'not null' => TRUE,
+              'default' => '',
+              'description' => 'Text id of existing tournament',
+          ),
+      ),
+      'primary key' => array('vid'),
+      'key' => array('nid'),
+  );
+  
+
+  return $schema;
+}
+
+function chgk_db_update_6000() {
+  $items = array();
+
+  drupal_install_schema('chgk_db');
+  $result = db_query('SELECT n.nid, n.vid FROM {node} n WHERE n.type="unsorted"');
+  while ($node = db_fetch_object($result)) {
+    $items[] = update_sql("INSERT INTO {unsorted} (nid, vid) VALUES ({$node->nid}, {$node->vid})");
+  }
+
+  return $items;
+}
+

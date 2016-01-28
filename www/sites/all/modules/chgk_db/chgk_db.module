@@ -1,0 +1,1438 @@
+<?php  //
+/**********************
+*
+* Tournament
+*
+*********************/
+
+#require_once(dirname(__FILE__)."/classes/DbPackage.class.php");
+#$path = './'. drupal_get_path('module', 'chgk_db') .'/includes';
+$path = './sites/all/modules/chgk_db/includes';
+$api_file = $path .'/sphinxapi.php';
+if (file_exists($api_file)) {
+  include_once($api_file);
+}
+
+if ( chgk_db_is_main_host() ) {
+    if (  !defined('_SAPE_USER')){
+             define('_SAPE_USER', '2216c1e54aaa5b09f81f7bb542e16991'); 
+                  }
+                       require_once($_SERVER['DOCUMENT_ROOT'].'/'._SAPE_USER.'/sape.php'); 
+                       $o['charset'] = 'UTF-8';                       
+                       $o['verbose'] = true;
+                       $o['host'] = 'db.chgk.info';
+
+                            $sape = new SAPE_client();
+                            unset($o);
+
+}
+
+if (!chgk_db_is_main_host() ) {
+  //  drupal_set_html_head('<meta name="robots" content="noindex" />');
+}
+
+/*spl_autoload_register('chgk_db_autoload');
+
+function chgk_db_autoload( $a) {
+  if ( $a[0]=='D' && $a[1] == 'b' ) {
+    require_once(dirname(__FILE__)."/classes/$a.class.php");
+ }
+}
+*/
+function chgk_db_is_main_host() {
+  return $_SERVER['HTTP_HOST'] == 'db.chgk.info' ;
+}
+function chgk_db_perm() {
+  return array('create unsorted node', 'edit own unsorted nodes', 'archive unsorted', 'edit any unsorted node');
+  return array("Create unsorted");
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function chgk_db_menu() {
+
+  $items['search'] = array(
+    'title' => 'Search',
+    'page callback' => 'drupal_goto',
+
+    'page arguments' => array('search/questions'),
+    'access arguments' => array('search content'),
+    'type' => MENU_NORMAL_ITEM,
+//    'file' => 'search.pages.inc',
+  );
+
+   $items['search']['type'] = MENU_NORMAL_ITEM;
+   $items['tour/%/view'] = array(
+    'title' => 'Читать',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0
+  );
+
+   $items['xml'] = array(
+     'page callback' => 'chgk_db_search_xml',
+     'access callback' => "chgk_db_access",
+     'type' => MENU_CALLBACK
+   );
+   $items['dbxml.php'] = array(
+    'page callback' => 'chgk_db_dbxml',
+    'access callback' => "chgk_db_access",
+    'type' => MENU_CALLBACK
+  );
+  $items['tour/%/noanswers'] = array(
+    'path' => 'noanswers',
+    'title' => 'Без ответов',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'chgk_db_tour_noanswers',
+    'page arguments' => array(1),
+    'access callback' => "chgk_db_access", 
+    'access arguments' => array(1, 'print'),
+
+      'weight' => 2
+  );
+
+  $items['tour/%/print'] = array(
+    'path'  => 'print',
+    'title' => 'Печатать',
+    'page callback' => 'chgk_db_print',
+    'page arguments' => array(1),
+    'access callback' => "chgk_db_access",
+    'access arguments' => array(1, 'print'),
+    'localized_options' => array('attributes' => array('target'=>'_blank')),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1    
+  );
+
+  
+  $items['tour/%/fb2'] = array(
+    'path'  => 'tour/%/fb2',
+    'title' => 'FB2',
+    'page callback' => 'chgk_db_fb2',
+    'page arguments' => array(1),
+    'access callback' => "chgk_db_access",
+    'access arguments' => array(1, 'fb2'),    
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3
+    
+  );
+
+  $items['node/%node/check'] = array(
+    'path'  => 'tour/%/check',
+    'title' => 'Проверить',
+    'page callback' => 'chgk_db_check_unsorted',
+    'page arguments' => array(1),
+    'access callback' => "unsorted_access",
+    'access arguments' => array('check', 1),    
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3
+    
+  );
+
+  $items['node/%node/publish'] = array(
+    'path'  => 'tour/%/publish',
+    'page callback' => 'chgk_db_publish_unsorted',
+    'page arguments' => array(1),
+    'access callback' => "unsorted_access",
+    'access arguments' => array('check', 1),    
+    'type' => MENU_NORMAL_ITEM,    
+  );
+
+  $items['node/%node/unpublish'] = array(
+    'path'  => 'tour/%/unpublish',
+    'page callback' => 'chgk_db_unpublish_unsorted',
+    'page arguments' => array(1),
+    'access callback' => "unsorted_access",
+    'access arguments' => array('check', 1),    
+    'type' => MENU_NORMAL_ITEM,
+    
+  );
+
+
+
+
+  $items['tour/%/xml'] = array(
+    'path'  => 'tour/%/xml',
+    'title' => 'XML',
+    'page callback' => 'chgk_db_xml',
+    'page arguments' => array(1),
+    'access callback' => "chgk_db_access",
+    'access arguments' => array(1, 'xml'),    
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['tour/xml'] = array(
+    'path'  => 'tour/xml',
+'title' => 'XML',
+    'page callback' => 'chgk_db_xml',
+    'page arguments' => array(''),
+    'access callback' => "chgk_db_access",
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['stat'] = array(
+    'path'  => 'stat',
+    'title' => 'Статистика',
+    'page callback' => 'chgk_db_stat',
+    'type' => MENU_NORMAL_ITEM,
+    'access callback' => "chgk_db_access",
+  );
+
+  $items['tree'] = array(
+      'path' => 'tree',
+      'title' => 'Все турниры',
+      'page callback' => 'chgk_db_tree',
+      'access callback' => "chgk_db_access",
+      'type' => MENU_NORMAL_ITEM      
+  );
+
+  $items['people'] = array(
+      'path' => 'people',
+      'title' => 'Авторы и редакторы',
+      'page callback' => 'chgk_db_people',
+      'access callback' => "chgk_db_access",
+      'type' => MENU_NORMAL_ITEM      
+  );
+
+  $items['editors'] = array(
+      'path' => 'editors',
+      'title' => 'Авторы и редакторы',
+      'page callback' => 'chgk_db_people',
+      'access callback' => "chgk_db_access",
+      'type' => MENU_CALLBACK
+  );
+
+  $items['person'] = array(
+      'page callback' => 'chgk_db_person',
+      'access callback' => "chgk_db_access",
+      'type' => MENU_LOCAL_TASK
+  );
+
+
+
+  $items['tour'] = array(
+      'path'  => 'tour',
+      'title' => 'Корень',
+      'page callback' => 'chgk_db_tour',
+      'page arguments' => array(1),
+      'access callback' => "chgk_db_access"
+  );
+
+  $items['cgi-bin/db.cgi'] = array(
+      'path'  => 'tour',
+      'title' => 'Корень',
+      'page callback' => 'chgk_db_tour',
+      'page arguments' => array(1),
+      'access callback' => "chgk_db_access"
+  );
+
+  $items['znatoki/cgi-bin/db.cgi'] = array(
+      'path'  => 'tour',
+      'title' => 'Корень',
+      'page callback' => 'chgk_db_tour',
+      'page arguments' => array(1),
+      'access callback' => "chgk_db_access"
+  );
+
+  $items['unsorted'] = array(
+      'path'  => 'unsorted',
+      'title' => 'Необработанное',
+      'page callback' => 'chgk_db_unsorted',
+      'access callback' => "chgk_db_access",
+  );
+
+
+  $items['question'] = array(
+      'path'  => 'question',
+      'page callback' => 'chgk_db_tour',
+      'page arguments' => array(1),
+      'access callback' => "chgk_db_access",
+      'type' => MENU_CALLBACK
+  );
+
+  $items['search/tours'] = array(
+      'path'  => 'search/tours',
+      'title' => 'Пакеты',
+      'page callback' => 'chgk_db_search_tour',
+      'page arguments' => array(1),
+      'access callback' => "chgk_db_access",
+      'type' => MENU_LOCAL_TASK,
+  );
+  
+  $items['search/unsorted'] = array(
+      'path'  => 'search/tours',
+      'title' => 'Необработанное',
+      'page callback' => 'chgk_db_search_unsorted',
+      'page arguments' => array(1),
+      'access callback' => "chgk_db_access",
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 3
+  );
+
+  $items['last'] = array(
+      'path'  => 'last',
+      'title' => 'Последние добавленные пакеты',
+      'page callback' => 'chgk_db_last',
+      'access callback' => "chgk_db_access",
+  );
+  
+
+ 
+ 
+ 
+  $items['search/questions'] = array(
+      'path'  => 'search/questions',
+      'title' => 'Вопросы',
+      'page callback' => 'chgk_db_search_questions',
+      'page arguments' => array(2),
+      //'path' => 'search',
+      'access callback' => "chgk_db_access",
+      'type' => MENU_LOCAL_TASK,
+
+  );
+
+  $items['random'] = array(
+      'path'  => 'random',
+      'title' => 'Случайный пакет',
+      'page callback' => 'chgk_db_get_random',
+      'access callback' => "chgk_db_access",
+      'type' => MENU_LOCAL_TASK,
+
+  );
+ 
+
+  $items['last/feed'] = array(
+        'path'  => 'last/feed',
+        'page callback' => 'chgk_db_last_feed',
+        'access callback' => "chgk_db_access",        
+  );
+
+  $items['chgk_db/%ctools_js/edit_question/%']  = array(
+      'title' => 'Редактирование вопроса',
+      'page callback' => 'chgk_db_edit_question',
+      'page arguments' => array(1,3),
+      'access callback' => "unsorted_access",
+      'access arguments' => array('check', 1),    
+      'type' => MENU_CALLBACK,
+
+  );
+
+  $items['person/%/questions'] = array(
+      'path' => 'person',
+      'page callback' => 'chgk_db_person_questions',
+      'access callback' => "chgk_db_access",
+      'page arguments' => array(1),
+
+      'type' => MENU_CALLBACK
+  );
+ 
+  $items['user/%user/person'] = array(
+      'title' => 'Страница',
+      'page callback' => 'chgk_db_user_person',
+      'page arguments' => array( 1 ),
+      'access callback' => "chgk_db_access_person",
+      'access arguments' => array( 1 ),
+      'type' => MENU_DEFAULT_LOCAL_TASK
+  );
+  
+  return $items;
+}
+
+
+function chgk_db_user( $op, $edit, $account ) {
+  if ( $op == 'after_update' ) {
+    if ( !empty($account->profile_charid) ) {
+     path_set_alias('user/'.$account->uid, 'person/'.$account->profile_charid);
+    }
+  }
+}
+
+function chgk_db_user_person( $user ) {
+  $p = DbPerson::get( $user );
+  if ($p && $p->exists()) {
+    return chgk_db_person( $user );
+  } else {
+    drupal_goto("user/".$user->uid);
+  }
+}
+
+function chgk_db_access_person( $user ) {
+  return $user->profile_charid? TRUE:FALSE;
+}
+
+function chgk_db_person_questions() {
+  $id = arg(1);  
+  $author = new DbPerson($id);
+  drupal_set_title($author->getFullName(). '. Вопросы.');
+  $breadcrumb = array_merge(
+  drupal_get_breadcrumb(),
+  $author->getBreadcrumb());
+  drupal_set_breadcrumb($breadcrumb);
+  return $author->getQuestionsHtml();
+
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function chgk_db_theme() {
+  $items['search_theme_form'] = array(
+      'arguments' => array('form' => NULL),
+      'template' => 'search-theme-form'
+  );
+  $items['chgk_db_print'] = array(
+    'arguments' => array(
+      'title' =>'',
+      'content' => '',
+      'link' => ''
+      
+      
+    ),
+    'template'=>'templates/chgk_db_print' 
+  );
+
+  $items['chgk_db_last_packages'] = array(
+      'arguments' => array(
+          'packages' => array(),
+          'mobile' => FALSE
+      ),
+      'template'=>'templates/chgk_db_last_packages'
+
+  );
+
+  $items['chgk_db_last_news'] = array(
+      'arguments' => array(
+          'nodes' => array()
+      ),
+      'template' => 'templates/chgk_db_last_news'
+  );
+  
+  $items['chgk_db_field'] = array(
+    'arguments' => array(
+      'field' => NULL
+    )  
+  );
+  $items['chgk_db_tour'] = array(
+    'arguments' => array(
+      'tour'=>NULL,
+      'alone' => TRUE
+    ),
+    'template'=>'templates/chgk_db_tour'
+  );
+
+  $items['chgk_db_tour_fb2'] = array(
+    'arguments' => array(
+      'tour'=>NULL,
+      'alone' => TRUE
+    ),
+    'template'=>'templates/chgk_db_tour_fb2'
+  );
+
+  $items['chgk_db_tours_fb2'] = array(
+    'arguments' => array(
+      'tournament'=>'',
+    ),
+    'template'=>'templates/chgk_db_tours_fb2'
+  );
+
+  $items['chgk_db_random_results'] = array(
+    'arguments' => array(
+      'results'=>'',
+    ),
+    'template'=>'templates/chgk_db_random_results'
+  );
+
+
+  $items['chgk_db_question'] = array(
+    'arguments' => array(
+      'question'=>NULL
+    ),
+    'template'=>'templates/chgk_db_question'
+  );
+
+  $items['chgk_db_question_txt'] = array(
+    'arguments' => array(
+      'question'=>NULL
+    ),
+    'template'=>'templates/chgk_db_question_txt'
+  );
+
+  $items['chgk_db_question_xml'] = array(
+    'arguments' => array(
+      'question'=>NULL
+    ),
+    'template'=>'templates/chgk_db_question_xml'
+  );
+
+
+  $items['chgk_db_question_fb2'] = array(
+    'arguments' => array(
+      'question'=>NULL
+    ),
+    'template'=>'templates/chgk_db_question_fb2'
+  );
+
+  $items['chgk_db_question_random'] = array(
+    'arguments' => array(
+      'question'=>NULL,
+      'number'=>0
+    ),
+    'template'=>'templates/chgk_db_question_random'
+  );
+
+
+
+
+  $items['chgk_db_jeopardy_question'] = array(
+    'arguments' => array(
+      'question'=>NULL
+    ),
+    'template'=>'templates/chgk_db_jeopardy_question'
+  );
+
+  $items['chgk_db_champ_full'] = array(
+    'arguments' => array(
+        'tour' => NULL
+    ),
+    'template'=>'templates/chgk_db_champ_full'
+  );
+  $items['chgk_db_fb2'] = array(
+      'arguments' => array('tournament'=>''),
+      'template' => 'templates/chgk_db_fb2'
+  );
+  
+  $items['chgk_db_search_box'] = array(
+      'arguments' => array('form' => NULL),
+      'template' => 'templates/chgk_db_search_box'
+  );
+  
+  $items['chgk_db_links'] = array(
+      'arguments' => array('links' => NULL),
+      'template' => 'templates/chgk_db_links'
+  );
+
+  return $items;
+}
+
+function chgk_db_node_info() {
+  return array(
+    'unsorted' => array(
+      'name' => t('Unsorted'),
+      'module' => 'unsorted',
+      'description' => t("Unsorted"),
+      'has_title' => TRUE,
+      'title_label' => t('Название'),
+      'has_body' => TRUE,
+      'body_label' => t('Пакет')
+    )
+  );
+}
+
+
+function unsorted_delete($node) {
+  // Notice that we're matching all revision, by using the node's nid.
+  if ($node->type == 'unsorted') {
+    db_query('DELETE FROM {unsorted} WHERE nid = %d', $node->nid);
+  }
+}
+
+function unsorted_insert($node) {
+  if ($node->type == 'unsorted') {
+  db_query("INSERT INTO {unsorted} 
+    (vid, nid, archived, text_id) VALUES (%d, %d, %d, '%s')", $node->vid, $node->nid, $node->archived, $node->text_id);
+  }
+}
+
+function unsorted_access($op, $node) {
+  global $user;
+  if ($op == 'view') {
+     return TRUE;
+  }
+  
+  if ($op == 'create') {
+     return user_access('create unsorted node');
+  }
+
+  if ($op == 'update' || $op == 'delete' || $op == 'check' ) {
+     if (user_access('edit own unsorted nodes') && ($user->uid == $node->uid) || user_access('edit any unsorted node') ) {
+       return TRUE;
+     }
+  }
+  return FALSE;
+                                  
+}
+
+function unsorted_load($node) {
+  $additions = db_fetch_object(db_query('SELECT archived, text_id FROM {unsorted} WHERE vid = %d', $node->vid));
+  return $additions;
+}
+
+
+function unsorted_form(&$node) {
+  // The site admin can decide if this node type has a title and body, and how
+  // the fields should be labeled. We need to load these settings so we can
+  // build the node form correctly.
+  $type = node_get_types('type', $node);
+  if ($type->has_title) {
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => check_plain($type->title_label),
+      '#required' => TRUE,
+      '#default_value' => $node->title,
+      '#weight' => -5
+    );
+  }
+
+  if ($type->has_body) {
+    $form['body_field'] = node_body_field($node, $type->body_label, $type->min_word_count);
+  }
+  if (user_access('archive unsorted')) {
+    // Now we define the form elements specific to our node type.
+    $form['text_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Текстовый идентификатор'),
+      '#default_value' => isset($node->text_id) ? $node->text_id : '',
+      '#size' => 8,
+      '#maxlength' => 8
+    );
+    $form['archived'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Архивировано',
+      '#default_value' => isset($node->archived) ? $node->archived : false,
+    );
+    
+  }
+
+  return $form;
+}
+
+
+
+function unsorted_update($node) {
+  // if this is a new node or we're adding a new revision,
+  
+  if ($node->revision) {
+    unsorted_insert($node);
+  }
+  else {
+    db_query("UPDATE {unsorted} SET text_id = '%s', archived = %d WHERE vid = %d", $node->text_id, $node->archived, $node->vid);
+  }
+}
+
+
+
+
+
+function chgk_db_print($string) {
+  $tournament = DbPackage::newFromDb($string);
+  print $tournament->getPrintVersion();
+}
+
+function chgk_db_tour_noanswers($name) {
+    $tournament = DbPackage::newFromDb($name);
+    $tournament->setNoAnswers();
+    
+/*    drupal_set_title($tournament->getFullTitle());
+    $breadcrumb = array_merge(drupal_get_breadcrumb(),$tournament->getBreadcrumb());
+    drupal_set_breadcrumb($breadcrumb);
+    return $tournament->getHtmlContent();
+    */
+     print $tournament->getPrintVersion();
+
+}
+
+function chgk_db_contact_submit( &$form, &$form_state) {
+    $instance = new DbContactForm( $form, $form_state );
+    $instance -> submit();
+}
+
+function chgk_db_tour($name) {
+  $number = arg(2);
+  if ( (arg(0)=='cgi-bin' && arg(1) == 'db.cgi') || arg(0) == 'znatoki' && arg(1)=='cgi-bin' && arg(2) == 'db.cgi' ) {
+	if ( isset( $_GET['tour'] ) ) {
+	    drupal_goto( 'tour/'.$_GET['tour'] );
+	    return;
+	} elseif( isset( $_GET['qofauthor'] ) ) {
+	    header("HTTP/1.1 301 Moved Permanently"); 
+	    unset ($_GET['q']);
+	    $url = url('http://questions.chgk.info/cgi-bin/db.cgi', array('query'=>$_GET, 'absolute' =>true));
+	    header("Location: $url"); 
+	    exit;
+	} else {
+	    drupal_goto('<front>');
+	}
+  }
+  if (arg(0)=='question' && !$number) {
+    drupal_goto('tour/'.arg(1));
+    return;
+  } 
+  if (empty($name)) {
+    $tournament = DbPackage::newRoot();    
+  } else {
+    $tournament = DbPackage::newFromDb($name);
+  }
+  $isQuestion=FALSE;
+  if (arg(0)=='question' && $number) {
+    $question = $tournament->getQuestion($number);
+    $isQuestion = $question && $question->exists();
+    if (!$isQuestion) {
+      drupal_goto($tournament->getLink());
+      return;
+    } elseif (arg(3) && arg(3)=='xml') {
+      header("Content-Type: text/xml");
+      print $question->getXML();
+      exit;
+    } else {
+      drupal_set_title($question->getFullTitle());
+      $breadcrumb = array_merge(drupal_get_breadcrumb(),$tournament->getBreadcrumb());
+      $breadcrumb[]=$tournament->getHtmlLinkForBreadrumb();
+      drupal_set_breadcrumb($breadcrumb);
+      
+      $question->setForSearch();
+      return $question->getHtml();
+    }
+  } else{
+    drupal_set_title($tournament->getFullTitle());
+    $breadcrumb = array_merge(drupal_get_breadcrumb(),$tournament->getBreadcrumb());
+    drupal_set_breadcrumb($breadcrumb);
+    return $tournament->getHtmlContent();
+  }
+}
+
+function chgk_db_tree() {        
+  $class = DbPackage::newRoot();
+  $class -> loadTree();
+  drupal_set_title('Все турниры');
+#  $breadcrumb = array_merge(drupal_get_breadcrumb(),$tournament->getBreadcrumb());
+  drupal_set_breadcrumb($breadcrumb);
+    
+    return $class->htmlTree()."\n";
+}
+
+function chgk_db_nodeapi($node, $op, $teaser=null, $page=null) {
+
+  if ($node->type=='unsorted' && $op=='view' && $page) {
+      $breadcrumb = 
+              drupal_get_breadcrumb();
+              
+      $breadcrumb[] = l('Необработанное','unsorted');
+      drupal_set_breadcrumb($breadcrumb);
+  }
+  
+  if ($node->type == 'chgk_issue' ) {
+    require_once(dirname(__FILE__).'/classes/DbIssue.class.php');
+    if ( $op=='update' ){
+      $oldnode = node_load($node->nid);
+      $issue = new DbIssue( $node );
+      $issue->update();
+    }
+
+    if (  $op== 'view' ) {
+      $issue = new DbIssue( $node, $teaser, $page );
+      $issue->view( );
+    } //elseif ( $op == '
+  }
+  if ($op == 'delete revision') {
+      // Notice that we're matching a single revision based on the node's vid.
+      db_query('DELETE FROM {chgk_db} WHERE vid = %d', $node->vid);
+  }
+  if ( $node->type == 'question_meta'  && ( $op == 'insert' || $op == 'update' ) ) {
+    $instance = new DbQuestionMeta();
+    $instance->onNodeSave( );
+
+    $field = $node->field_discussion_url;
+    if ( is_array( $field ) && $field && is_array( $field[0] ) ) {
+      $url = $field[0]['value'];
+#      print $url;
+#      exit;
+    }
+  }
+}
+
+function chgk_db_xml($string) {
+  if (empty($string)) {
+    $tournament = DbPackage::newRoot();
+  } else {
+    $tournament = DbPackage::newFromDb($string);
+  }
+  drupal_set_header("Content-Type: text/xml");
+  print $tournament->getXml();
+  exit;
+}
+
+function chgk_db_fb2($string) {
+  $filename = "$string.fb2"; 
+  $zipname = $filename.".zip";
+  $fb2_folder = file_directory_path()."/fb2";
+  if (!is_dir( $fb2_folder )) {
+    mkdir( $fb2_folder );
+  }
+  $zip_real_path = realpath($fb2_folder)."/$zipname";
+  $zip_path = $fb2_folder."/$zipname";
+  $tournament = DbPackage::newFromDb($string);
+  $last_updated =  $tournament->getLastUpdated();  
+
+  if ( is_file( $zip_real_path ) && (date("Y-m-d H:i:s", filemtime( $zip_real_path ) ) > $last_updated )) {
+    drupal_goto( $zip_path );
+  }
+
+  $xml = $tournament->getFb2();
+  if (!$xml) {
+     print "Something is wrong :(";
+     exit;
+  }
+  $file_path = file_directory_temp()."/$filename";
+  
+  $f = fopen ($file_path, "w");
+  fputs($f, $xml);
+  fclose($f);
+  system($p = "zip -j $zip_real_path $file_path");
+  drupal_goto( $zip_path );
+}
+
+
+function chgk_db_access($tour=NULL, $action ='') {
+  if ($action == 'fb2') {
+    $tournament = DbPackage::newFromDb($tour);
+    if (!$tournament->hasFb2()) {
+      return FALSE;
+    }
+  } elseif ($action == 'print') {
+    $tournament = DbPackage::newFromDb($tour);  
+    if (!$tournament->hasPrintVersion()) {
+      return FALSE;
+    }  
+  } 
+  return TRUE;
+}
+
+
+/**
+ * Implementation of hook_form_alter().
+ */
+
+function chgk_db_form_alter(&$form, &$form_state, $form_id) {
+  if  ($form['#submit'][0] == 'search_box_form_submit') {
+    $form['#submit'][] = 'chgk_db_search_box_submit';
+  }
+
+  if ($form_id == 'contact_mail_page' && $path != 'contact') {
+    $instance = new DbContactForm( $form, $form_state );
+    $instance -> alter();
+  }
+  
+  if ( $form_id == 'question_meta_node_form') {
+    $instance = new DbQuestionMeta();
+    $instance->form_alter( $form );
+  }
+  
+  if ( $form_id == 'user_profile_form' ) {
+    $form['#submit'][] = 'chgk_db_profile_submit';
+    $form['#validate'][] = 'chgk_db_profile_validate';
+  }
+
+/*  if ($form_id == 'unsorted_node_form') {
+      node_load($form['#node']);
+      $form['archived'] = array(
+          '#type' => 'checkbox',
+          '#title' => 'Архивировано',
+          '#default_value' => $form['#node']->archived
+      );
+  }
+*/
+  
+}
+
+
+function chgk_db_profile_submit($form, $form_state) {
+#   path_set_alias
+}
+
+function chgk_db_profile_validate($form, $form_state) {
+  if ( empty( $form_state['values']['profile_charid'] ) ) {
+    return TRUE;
+  }
+  $person = new DbPerson ($form_state['values']['profile_charid'] );
+  if ( !$person->exists() ) {
+    form_set_error( 'profile_charid', 'Неправильный идентификатор автора/редактора' );
+  }
+}
+
+function chgk_db_people_filter_form() {
+    $instance = chgk_db_get_people_instance();
+    return $instance -> getFilterForm();  
+}
+
+function chgk_db_people_filter_form_submit( $form, &$form_state ) {
+    $instance = chgk_db_get_people_instance();
+    return $instance -> filterFormSubmit( $form, $form_state );
+}
+
+
+function chgk_db_search_tour() {
+  drupal_set_title('Поиск пакетов');
+  drupal_add_css(drupal_get_path('module', 'chgk_db') .'/css/chgk_db.css', 'module', 'all', FALSE);
+  $engine = new DbSearch();
+  return $engine->getTournamentPage();
+}
+
+function chgk_db_search_unsorted() {
+  drupal_set_title('Поиск в необработанном');
+  drupal_add_css(drupal_get_path('module', 'chgk_db') .'/css/chgk_db.css', 'module', 'all', FALSE);
+  $engine = new DbSearch();
+  return $engine->getUnsortedPage();
+}
+
+function chgk_db_search_xml(){
+  $engine = new DbSearch();
+  drupal_set_header("Content-Type: text/xml");
+
+  print $engine->getXML();
+  exit;
+}
+
+function chgk_db_search_questions() {
+  if (isset($_GET['sstr'])) {
+    $sstr = iconv('koi8r', 'utf-8',$_GET['sstr']);
+#    $sstr = $_GET['sstr'];
+#$sstr = iconv('cp-1251', 'utf-8',$_GET['sstr']);
+    drupal_goto("search/questions/$sstr");
+    exit;
+  } elseif(isset($_GET['rand'])) {
+    drupal_goto("random");
+    exit;    
+  } elseif (isset($_GET['tour'])) {
+    drupal_goto('tour/'.$_GET['tour']);
+  }
+
+  drupal_add_css(drupal_get_path('module', 'chgk_db') .'/css/chgk_db.css', 'module', 'all', FALSE);
+  $engine = new DbSearch();
+  drupal_set_title( $engine->getTitle() );
+  return $engine->getPage();
+}
+
+function chgk_db_get_random() {
+  global $base_root;
+  db_query("DELETE FROM {cache_page} WHERE cid = '". $base_root . request_uri() ."'");
+  drupal_set_title('Случайный пакет');
+  drupal_add_css(drupal_get_path('module', 'chgk_db') .'/css/chgk_db.css', 'module', 'all', FALSE);
+  drupal_add_js(drupal_get_path('module', 'chgk_db') .'/js/chgk_db.js');
+  $engine = new DbSearch();
+  return $engine->getRandomPage();
+}
+
+
+function chgk_db_person() {
+    global $person;
+
+    if ( ($id = arg(1) ) || $person ) {
+        $author = $person or $author = new DbPerson($id);
+        drupal_set_title($author->getFullName());
+        $breadcrumb = array_merge(
+        drupal_get_breadcrumb(),
+        $author->getBreadcrumb());
+        drupal_set_breadcrumb($breadcrumb);
+        return $author->getHtmlPage();
+    } 
+}
+
+
+function chgk_db_people() {
+  $authorsEngine = chgk_db_get_people_instance();
+  return $authorsEngine->getAllHtml();
+}
+
+
+function chgk_db_get_people_instance() {
+    static $instance = false;
+    if ( !$instance) $instance = new DbPeople;
+    return $instance;
+}
+
+function unsorted_view($node, $teaser = FALSE, $page = FALSE) {
+  $node = node_prepare($node, $teaser);
+  if ($node->text_id) {
+    $node->content['body']['#value'] =
+          '<p>'.l('В Базе','tour/'.$node->text_id)."</p>\n".
+                  $node->content['body']['#value'];
+  }
+  return $node;
+}
+
+#function chgk_db_forms($form_id, $args) {
+#    $forms['chgk_db_search_questions'] = array(
+#	'callback'=>'chgk_db_search_questions_form'
+#    );
+#}
+
+function chgk_db_search_questions_form(&$form_state) {
+  $engine = new DbSearch();
+  $form = $engine->getSearchForm($form_state);
+  return $form;
+}
+
+function chgk_db_search_unsorted_form(&$form_state) {
+  $engine = new DbSearch();
+  $form = $engine->getSearchUnsortedForm($form_state);
+  return $form;
+}
+
+function chgk_db_search_tournaments_form(&$form_state) {
+  $engine = new DbSearch();
+  $form = $engine->getSearchTournamentsForm($form_state);
+  return $form;
+}
+
+function chgk_db_get_random_form(&$form_state) {
+  $engine = new DbSearch();
+  $form = $engine->getRandomForm($form_state);
+  return $form;
+}
+
+
+
+function chgk_db_search_box_submit($form, &$form_state) {
+  $form_id = $form['form_id']['#value'];
+  $form_state['redirect'] = 'search/questions/'. trim($form_state['values'][$form_id]);
+}
+
+function chgk_db_search_submit($form, &$form_state) {
+  $engine = new DbSearch();
+  return $engine->formSubmit($form, $form_state);
+}
+
+function chgk_db_search_tournaments_submit($form, &$form_state) {
+  $engine = new DbSearch();
+  return $engine->tournamentsFormSubmit($form, $form_state);
+}
+
+function chgk_db_get_random_submit($form, &$form_state) {
+  $engine = new DbSearch();
+  return $engine->randomSubmit($form, $form_state);
+}
+
+function chgk_db_block($op, $delta = 0 ) {
+  global $sape;
+  if (!defined('_SAPE_USER')) {
+    define('_SAPE_USER', '2216c1e54aaa5b09f81f7bb542e16991'); 
+  }
+  if ( chgk_db_is_main_host() && !$sape) {
+    require_once($_SERVER['DOCUMENT_ROOT'].'/'._SAPE_USER.'/sape.php'); 
+    $o['charset'] = 'UTF-8';
+    $o['verbose'] = true;
+    $o['host'] = 'db.chgk.info';
+    $sape = new SAPE_client( $o );
+    unset($o);
+  }
+  drupal_add_css(drupal_get_path('module', 'chgk_db') .'/css/chgk_db.css', 'module', 'all', FALSE);
+  drupal_add_js(drupal_get_path('module', 'chgk_db') .'/js/chgk_db.js');
+
+  $block = array();
+  if ($op == 'list') {
+    $block[0]['info'] = 'chgk_db:Последние добавленные турниры';
+    $block[1]['info'] = 'chgk_db:Случайные вопросы';
+    $block[2]['info'] = 'chgk_db:Последнее обновление';
+    $block[3]['info'] = 'chgk_db:trustlink';
+    $block[4]['info'] = 'chgk_db:Дерево-меню';
+    $block[5]['info'] = 'chgk_db:Новости';
+    $block[6]['info'] = 'chgk_db:Информация о турнире';
+    $block[7]['info'] = 'chgk_db:Туры';
+    $block[8]['info'] = 'chgk_db:sape last';
+
+  } elseif($op == 'view') {
+    if ($delta == 0) {
+      $block['subject'] = 'Новинки';
+      $instance = new DbDatabase();
+      $res = $instance->getLastTournamentsRes(25);
+      $block['content'] = '';
+      while ($row = $instance->fetch_row($res)) {
+        $package = DbPackage::newFromRow($row);
+        $block['content'].='<li>'.$package->getHtmlLinkForList()."</li>";
+      }
+      if ($block['content']) {
+        $block['content'] = "<ul>".$block['content']."</ul>";
+      }
+    } elseif ($delta == 1) {
+      $block['subject'] = 'Случайные вопросы';
+      $instance = new DbSearch();
+      $block['content'] = $instance->getRandomBlock(2);
+    } elseif ($delta == 2) {
+      $block['subject'] = '';
+      $var = variable_get('update_date','');
+      $block['content'] = $var ? 'Последнее обновление: '.$var : '';
+    } elseif ($delta == 3 ) {
+        $block['content'] = '';//No trustlink code
+    } elseif($delta == 4) {
+         if ($menu = menu_tree('primary-links')) {
+          $block['subject'] = 'Меню';
+          $block['content'] = $menu;
+        }
+        return $block;
+    }
+    elseif ($delta == 5) {
+      $block['content']= theme('chgk_db_last_news',chgk_db_last_nodes());
+      $block['subject'] = 'Новости';
+    }
+    elseif ($delta == 6) {
+      if ( arg(0) == 'tour' && $tourId = arg(1)) {
+        $tournament = DbPackage::newFromDb($tourId);
+        $block['content']= $tournament->getTourInfoBlock();
+      } else {
+        if (!$tourId) $block['content'] = '';
+      }
+      $block['subject'] = 'Ссылки';
+    }
+    elseif ($delta == 7) {
+      $tourId = arg(1); 
+      if (arg(0)!='tour' || !$tourId) $block['content'] = '';
+      else {
+        $tournament = DbPackage::newFromDb($tourId);
+        $block['content']= $tournament->getTourList();
+      }
+      $block['subject'] = 'Туры';
+    } elseif ($delta == 8 ) {
+
+      if ($_SERVER['HTTP_HOST'] != 'db.chgk.info') {
+        return '';
+      }
+      if (1 || $_GET['debug']) {
+        $block['content'] = $sape->return_block_links(2,0).$sape->return_block_links(2,0);
+      }
+    }
+
+  }
+  return $block;
+}
+
+function chgk_db_last_nodes() {
+  $output = '';
+  $result = pager_query(db_rewrite_sql('SELECT n.nid FROM {node} n LEFT JOIN
+    {node_revisions} r ON (n.vid=r.vid) WHERE n.promote = 1 AND n.status = 1 ORDER BY n.sticky DESC, n.created DESC'),
+          10);
+  while ($node = db_fetch_object($result)) {
+    $nodes[] = node_load($node->nid);
+  }
+  return $nodes;
+}
+/**
+ * Form builder; Output a search form for the search block and the theme's search box.
+ *
+ * @ingroup forms
+ * @see search_box_form_submit()
+ * @see theme_search_box_form()
+ */
+function chgk_db_search_box(&$form_state) {
+  $form['keys'] = array(
+    '#title' => 'Искать вопросы',
+    '#type' => 'textfield',
+    '#size' => 15,
+    '#default_value' => '',
+    '#attributes' => array('title' => 'Введите ключевые слова')
+  );
+  $form['submit'] = array('#type' => 'submit', '#value' => 'Искать вопросы');
+  $form['#submit'][] = 'chgk_db_search_box_form_submit';
+
+  return $form;
+}
+
+function chgk_db_search_box_form_submit($form, &$form_state) {
+  if (isset($_REQUEST['destination'])) {
+    unset($_REQUEST['destination']);
+  }
+  if (isset($_REQUEST['edit']['destination'])) {
+    unset($_REQUEST['edit']['destination']);
+  }
+  $form_state['redirect'] = 'search/questions/'. trim($form_state['values']['keys']);
+}
+
+function chgk_db_unsorted() {
+  $result = pager_query(db_rewrite_sql('SELECT n.nid, n.sticky, n.created FROM {node} n 
+    LEFT JOIN {unsorted} u ON (u.nid=n.nid) WHERE n.status = 1 and n.type="unsorted" and
+    u.archived=0 ORDER BY n.sticky DESC, n.created DESC'), 200);
+
+  $output = '';
+  $num_rows = FALSE;
+  while ($node = db_fetch_object($result)) {
+    $output .= node_view(node_load($node->nid), 1);
+    $num_rows = TRUE;
+  }
+
+  if ($num_rows) {
+    $feed_url = url('rss.xml', array('absolute' => TRUE));
+    drupal_add_feed($feed_url, variable_get('site_name', 'Drupal') .' '. t('RSS'));
+    $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
+  }
+  drupal_set_title('Необработанное');
+
+  return $output;
+}
+
+function chgk_db_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
+  switch ($op) {
+    case 'list':
+      return array(0 => 'Пакет');
+    case 'description':
+      return ('Воспринимает тексты в правильном формате');
+    case 'prepare':
+//        $text = preg_replace('@<раздатка>(.+?)</раздатка>@se', "'\xFEраздатка\xFF$1\xFE/code\xFF'", $text);
+      return $text;
+    case "process":
+      $atext = preg_split("/\n\n/",$text);
+      $newtext = '';
+      foreach ($atext as $t) {
+        $t=preg_replace('/\nВопрос/m', "<br />Вопрос", $t);
+        $t=preg_replace('/\nОтвет/m', "<br />Ответ", $t);
+        $t=preg_replace('/\nКомментари/m', "<br />Комментари", $t);
+        $t=preg_replace('/\nЗач/m', "<br />Зач", $t);
+        $t=preg_replace('/\nИсточник/m', "<br />Источник", $t);
+
+        $field = new DbField('',$t);
+        $field->setImageBaseUrl("/".file_directory_path());
+        $t = $field->getHtml();
+        $newtext.="<p>".$t."</p>";
+      }
+      return $newtext;
+    default:
+      return $text;
+    }
+}
+
+
+function chgk_db_last() {
+  $output = '';
+  $packageNumber = 100;
+  if (arg(1)=='mobile') $packageNumber = 10;
+  $instance = new DbDatabase();
+  $res = $instance->getLastTournamentsRes($packageNumber);
+  $title = 'Последние добавленные вопросы';
+  drupal_set_title($title);
+  while ($row = $instance->fetch_row($res)) {
+    $package = DbPackage::newFromRow($row);
+    $packages[] = $package;
+  }
+  if ($packages) {
+    $output = theme('chgk_db_last_packages',$packages, arg(1)=='mobile');
+    $output .= theme('pager', NULL, $packageNumber);
+  }
+  
+  drupal_add_feed(url('last/feed'), t('RSS - !title', array('!title' => $title)));
+  return $output; 
+}
+
+function chgk_db_last_feed() {
+  global $base_url, $language;
+
+  $instance = new DbDatabase();
+  $res = $instance->getLastTournamentsRes(50);
+
+  $channel = array(
+    'version'     => '2.0',
+    'title'       => 'База вопросов. Последние добавленные вопросы',
+    'link'        => $base_url,
+    'language'    => $language->language,
+    'description' => ''
+  );
+
+  while ($row = $instance->fetch_row($res)) {
+    $package = DbPackage::newFromRow($row);
+    $packages[] = $package;
+  }
+
+  foreach ($packages as $package) {
+    $editor = $package->getEditor();
+    $info = $editor ? 'Редактор(ы): '.$editor : '';
+    $extra = array(
+       array('key' => 'pubDate', 'value' => date('r', strtotime($package->getCreatedAt()))), 
+       array('key' => 'guid', 'value' => $package->getFileName(), 'attributes' => array('isPermaLink' => 'false') )
+    );
+    $items .= format_rss_item($package->getTitle().'. '.$package->getPlayedAtDate(), url($package->getLink(), array('absolute'=>true)), 
+    $info, $extra);
+  }
+
+  $channel_defaults = array(
+    'version'     => '2.0',
+    'title'       => variable_get('site_name', 'Drupal'),
+    'link'        => $base_url,
+    'description' => variable_get('site_mission', ''),
+    'language'    => $language->language
+  );
+  $channel = array_merge($channel_defaults, $channel);
+
+  $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  $output .= "<rss version=\"". $channel["version"] ."\" xml:base=\"". $base_url ."\" ". drupal_attributes($namespaces) .">\n";
+  $output .= format_rss_channel($channel['title'], $channel['link'], $channel['description'], $items, $channel['language']);
+  $output .= "</rss>\n";
+
+  drupal_set_header('Content-Type: application/rss+xml; charset=utf-8');
+  print $output;
+}
+
+function chgk_db_dbxml() {
+    drupal_goto('tour/'.$_GET['tour'].'/xml');
+}
+
+
+function chgk_db_check_unsorted( $node ) {
+    module_load_include('class.php', 'chgk_db', 'classes/DbUnsorted');
+    $instance = new DbUnsorted ($node );
+    return  $instance->getCheckedHTML();
+}
+
+function chgk_db_publish_unsorted( $node ) {
+    module_load_include('class.php', 'chgk_db', 'classes/DbUnsorted');
+    $instance = new DbUnsorted ($node );
+    return  $instance->publish();
+}
+
+function chgk_db_unpublish_unsorted( $node ) {
+    module_load_include('class.php', 'chgk_db', 'classes/DbUnsorted');
+    $instance = new DbUnsorted ($node );
+    return  $instance->unpublish();
+}
+
+function chgk_db_get_ajax_editor() {
+  static $editor = false;
+  if ( !$editor ) {
+    module_load_include('class.php', 'chgk_db', 'classes/DbAjaxEditor');
+    $editor = new DbAjaxEditor();
+  }
+  return $editor;
+}
+
+function chgk_db_edit_question( $js, $q ) {
+  $editor = chgk_db_get_ajax_editor();
+  return $editor->getFormDialog( $js, $q );
+}
+
+function chgk_db_edit_question_form() {
+  $editor = chgk_db_get_ajax_editor();
+  return $editor->getForm();
+}
+
+function chgk_db_question_edit_submit( &$form, &$form_state ) {
+  $editor = chgk_db_get_ajax_editor();
+  $editor->submit( $form, $form_state );
+}
+
+function chgk_db_form_clean( $form ) {
+  unset($form['form_token']);
+  unset($form['form_build_id']);
+  unset($form['form_id']);
+  return $form;
+}
+
+function chgk_db_menu_link_alter( $item ) {
+#print_r($item);
+}
+
+function chgk_db_menu_alter(&$items) { 
+  $items['user/%user/view']['access callback'] = 'chgk_db_disable_user_view';
+
+  $items['user/%user/view']['access arguments'] = array(1); 
+#  $items['user/%user_uid_optional']['page callback'] = 'chgk_db_person';
+} 
+
+                
+function chgk_db_disable_user_view($user){
+  if ( $user ->profile_charid ) return FALSE;
+  return TRUE;
+}
+
+
+function chgk_db_views_api() {
+  return array('api'=>2);
+}
+
+function chgk_db_mail($key, &$message, $params) {
+  $language = $message['language'];
+  if ($key == 'issue_status_updated') {
+    $message['subject'] = $params['subject'];
+    $message['body'] = $params['body'];
+  }
+  $message['headers']['Bcc'] = 'semizarov+bcc@gmail.com';  
+}
+
+function chgk_db_stat(){
+  $instance = new DbStat();
+  return $instance->getPage();
+  $instance = new DbDatabase();
+  $res = $instance->getLastTournamentsRes(50000);
+
+  while ($row = $instance->fetch_row($res)) {
+    $package = DbPackage::newFromRow($row);
+    $number[$package->getCreatedAt()]+=$package->getQuestionsNumber();
+  }
+  ksort($number);
+  reset($number);
+  $first = key($number);
+  $last = date('Y-m-d');
+  $data = array();
+  $n = 0;
+  $month_data1[] = "['Дата', 'Количество вопросов']";
+  $month_data2[] = "['Месяц', 'Количество вопросов']";
+
+  for ($date = $first; $date<=$last; $date = date('Y-m-d', strtotime($date.' +1 days') ) ) {
+    $month = preg_replace('/-\d\d$/', '', $date);
+    if (!isset($md[$month])) {
+      $md[$month] = 0;
+    }
+    if (isset($number[$date])) {
+      $n += $number[$date];
+      $md[$month] += $number[$date];
+    }
+    $data[] = "['$date', $n]";
+    if($month!='2000-10') {
+      $month_data2[$month] = "['$month', $md[$month] ]";
+    }
+    $month_data1[$month] = "['$month', $n ]";
+  }
+  $js1 = '<script>
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+        function drawChart() {
+          var data = google.visualization.arrayToDataTable(['.
+            join (",\n", $month_data1).
+         ']);
+          var options = {
+            title: "Количество вопросов"
+          };
+          var chart = new google.visualization.LineChart(document.getElementById("chart_div"));
+          chart.draw(data, options);
+        }
+      </script>';
+
+  $js2 = '<script>
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+        function drawChart() {
+          var data = google.visualization.arrayToDataTable(['.
+            join (",\n", $month_data2).
+         ']);
+          var options = {
+            title: "Количество вопросов"
+          };
+          var chart = new google.visualization.LineChart(document.getElementById("chart_div2"));
+          chart.draw(data, options);
+        }
+      </script>';
+  drupal_set_html_head('<script type="text/javascript" src="https://www.google.com/jsapi"></script>'.
+    $js1.$js2
+  );
+
+  return '<div id="chart_div" style="width: 100%; height: 500px;"></div>'
+  .'<div id="chart_div2" style="width: 100%; height: 500px;"></div>';
+}
+
+function chgk_db_exit($destination = NULL) {
+  if ($destination == NULL) {
+    $this_page = request_uri();
+    if (@$_GET['a']){
+//      print $this_page;
+//      exit;
+    }
+      if (ereg('random', $this_page)) {
+        global $base_root;
+        cache_clear_all($base_root . $this_page, 'cache_page');
+        return;
+      }
+  }
+}
