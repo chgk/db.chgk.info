@@ -121,8 +121,8 @@ class DbSearch {
     $this->engine->setSearchFields($this->getSearchFields());
     $this->engine->setAllParameter($this->getAllAny()=='all_words');
     $this->engine->setQuestionTypes($this->getQuestionTypes());
-    $this->engine->setFromDate($this->getFromDate());
-    $this->engine->setToDate($this->getToDate());
+    $this->engine->setFromDate($this->isDefaultFrom()? false: $this->getFromDate());
+    $this->engine->setToDate($this->isDefaultTo()? false :$this->getToDate());
     $this->engine->setSortBy( $this->getSortBy());
     $this->engine->setLimit($this->getLimit());
     $this->engine->setXML( $this->xml );
