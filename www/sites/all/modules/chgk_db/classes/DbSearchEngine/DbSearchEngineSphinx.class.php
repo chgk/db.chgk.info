@@ -144,20 +144,22 @@ class DbSearchEngineSphinx extends DbSearchEngine {
     $this->sstr .= $modifiedsearchString;
   }  
   
-  protected function setDateFilter() {  
-     if ($this->fromDate) {
-        $timestamp1 = mktime(0,0,0,$this->fromDate['month'],
-        $this->fromDate['day'], $this->fromDate['year']);
-     }
+  protected function setDateFilter() {
+    $timestamp1 = 0;
+    $timestamp2 = time();
+    if ($this->fromDate) {
+       $timestamp1 = mktime(0,0,0,$this->fromDate['month'],
+       $this->fromDate['day'], $this->fromDate['year']);
+    }
 
-     if ($this->toDate) {
-        $timestamp2 = mktime(23,59,59,$this->toDate['month'], 
-        $this->toDate['day'], $this->toDate['year']);
-     }
+    if ($this->toDate) {
+       $timestamp2 = mktime(23,59,59,$this->toDate['month'], 
+       $this->toDate['day'], $this->toDate['year']);
+    }
 
-     if ($this->fromDate && $this->toDate) {
-       $this->sphinx->setFilterRange('playDate', $timestamp1, $timestamp2);
-     }
+    if ($this->fromDate || $this->toDate) {
+      $this->sphinx->setFilterRange('playDate', $timestamp1, $timestamp2);
+    }
   }
 
   protected function setAuthorFilter() {

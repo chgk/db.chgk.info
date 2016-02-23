@@ -187,8 +187,6 @@ class DbSearch {
       $this->sortBy = 'rel';
     }
     return $this->sortBy;
-
-    return 'date';
   }
 
   protected function doUnsortedSearch() {
@@ -776,6 +774,7 @@ class DbSearch {
       }
 
       $this->addQuestionTypesToRedirectUrl();
+      $this->addSortByToRedirectUrl();
       $this->addSearchFieldsToRedirectUrl();
       $this->addDatesToRedirectUrl();
       $this->addLimitToRedirectUrl();
