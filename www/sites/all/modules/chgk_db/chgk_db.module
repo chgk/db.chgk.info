@@ -826,6 +826,13 @@ function chgk_db_form_alter(&$form, &$form_state, $form_id) {
   }
   
   if ( $form_id == 'user_profile_form' ) {
+	if (user_access('administer users')) {
+      $form['descr'] = [
+        '#type' => 'item',
+        '#value' => l('Искать', 'people/search/'.trim($form['#parameters'][2]->profile_surname), ['attributes' => ['target' => 'search_author']])
+          . '&nbsp;'.l('Следующий', 'user/'.(arg(1)+1).'/edit/Личная информация')
+      ];
+	}
     $form['#submit'][] = 'chgk_db_profile_submit';
     $form['#validate'][] = 'chgk_db_profile_validate';
   }
@@ -1348,7 +1355,12 @@ function chgk_db_mail($key, &$message, $params) {
     $message['subject'] = $params['subject'];
     $message['body'] = $params['body'];
   }
-  $message['headers']['Bcc'] = 'semizarov+bcc@gmail.com';  
+  $message['headers']['Bcc'] = 'semizarov+bcc@gmail.com';
+}
+
+function chgk_db_mail_alter(&$message) {
+  $message['headers']['From'] = $message['headers']['Sender'];
+  $message['from'] = $message['headers']['Sender'];
 }
 
 function chgk_db_stat(){
