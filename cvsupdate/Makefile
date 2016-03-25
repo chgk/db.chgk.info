@@ -1,4 +1,5 @@
 export DB_CHGK_NAME=chgk
+export DB_DRUPAL_NAME=chgk_drupal
 export DB_USERNAME=root
 export DB_USERPASS=
 export WORKDIR=$(CURDIR)/dump
@@ -80,7 +81,7 @@ $(SPHINX_DIR): | $(WORKDIR)
 	mkdir $(SPHINX_DIR)
 
 init_sphinx:
-	$(INSTALLSCRIPTS)/make_sphinx_conf
+	$(CURDIR)/make_sphinx_conf
 
 start_sphinx:
 	$(INSTALLSCRIPTS)/start_sphinx
