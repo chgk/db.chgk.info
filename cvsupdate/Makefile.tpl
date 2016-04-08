@@ -1,4 +1,5 @@
 export DB_CHGK_NAME=
+export DB_DRUPAL_NAME=
 export DB_USERNAME=
 export DB_USERPASS=
 export WORKDIR=$(CURDIR)/dump
@@ -80,7 +81,7 @@ $(SPHINX_DIR): | $(WORKDIR)
 	mkdir $(SPHINX_DIR)
 
 init_sphinx:
-	$(INSTALLSCRIPTS)/make_sphinx_conf
+	$(CURDIR)/make_sphinx_conf
 
 start_sphinx:
 	$(INSTALLSCRIPTS)/start_sphinx
@@ -157,7 +158,7 @@ updateauthors:
 
 
 updatedate:
-	$(MAKE) $(ALLTIMESTAMP)
+	$(INSTALLSCRIPTS)/updatedate $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
 	
 $(AUTHORSTIMESTAMP): dict/nicks dict/authors $(TEXTTIMESTAMP) $(INDEXTIMESTAMP)
 	$(MAKE) people

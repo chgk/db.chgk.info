@@ -158,7 +158,7 @@ updateauthors:
 
 
 updatedate:
-	$(MAKE) $(ALLTIMESTAMP)
+	$(INSTALLSCRIPTS)/updatedate $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
 	
 $(AUTHORSTIMESTAMP): dict/nicks dict/authors $(TEXTTIMESTAMP) $(INDEXTIMESTAMP)
 	$(MAKE) people
