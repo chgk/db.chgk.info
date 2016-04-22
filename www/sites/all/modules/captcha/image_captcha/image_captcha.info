@@ -1,0 +1,12 @@
+name = "Image CAPTCHA"
+description = "Provides an image based CAPTCHA."
+package = "Spam control"
+dependencies[] = captcha
+core = 6.x
+
+; Information added by Drupal.org packaging script on 2015-09-08
+version = "6.x-2.6+2-dev"
+core = "6.x"
+project = "captcha"
+datestamp = "1441724369"
+

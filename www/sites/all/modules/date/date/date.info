@@ -1,0 +1,13 @@
+name = Date
+description = Defines CCK date/time fields and widgets.
+dependencies[] = content
+dependencies[] = date_api
+dependencies[] = date_timezone
+package = Date/Time
+core = 6.x
+; Information added by Drupal.org packaging script on 2015-05-09
+version = "6.x-2.10+2-dev"
+core = "6.x"
+project = "date"
+datestamp = "1431185897"
+

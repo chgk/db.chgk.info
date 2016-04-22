@@ -1,0 +1,12 @@
+name = Date Timezone
+description = Needed when using Date API. Overrides site and user timezone handling to set timezone names instead of offsets.
+package = Date/Time
+dependencies[] = date_api
+core = 6.x
+
+; Information added by Drupal.org packaging script on 2015-05-09
+version = "6.x-2.10+2-dev"
+core = "6.x"
+project = "date"
+datestamp = "1431185897"
+
