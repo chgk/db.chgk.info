@@ -2,6 +2,7 @@ export DB_CHGK_NAME=chgk
 export DB_DRUPAL_NAME=chgk_drupal
 export DB_USERNAME=root
 export DB_USERPASS=
+export DB_HOSTNAME=localhost
 export WORKDIR=$(CURDIR)/dump
 export CNF=empty
 export SPHINX_DIR=$(WORKDIR)/sphinx
@@ -15,6 +16,7 @@ DICTDIR=$(CURDIR)/dict
 IMAGEDIR=$(SRCDIR)/images
 SOUNDDIR=$(SRCDIR)/sounds
 ATTDIR=$(SRCDIR)/attachments
+DRUPALSOURCEDIR=$(CURDIR)/../www
 DESTIMAGEDIR=$(DOCUMENT_ROOT)/images/db
 DESTSOUNDDIR=$(DOCUMENT_ROOT)/sounds/db
 DESTATTDIR=$(DOCUMENT_ROOT)/attachments
@@ -57,10 +59,23 @@ rebuild: $(INITED)
 	$(MAKE) $(AUTHORSTIMESTAMP)
 	$(MAKE) reindexquestions
 	rm -f $(ALLTIMESTAMP)
-	$(MAKE) updatedate
-	$(MAKE) deploy_static
+	$(MAKE) deploy_all_static
 
-deploy_static: | $(DESTIMAGEDIR) $(DESTSOUNDDIR)
+deploy_all_static: | $(DESTIMAGEDIR) $(DESTSOUNDDIR) $(DESTATTDIR) 
+	cp $(IMAGEDIR)/*.gif $(DESTIMAGEDIR)
+	cp $(IMAGEDIR)/*.jpg $(DESTIMAGEDIR)
+	touch $(IMAGETIMESTAMP)
+	cp $(SOUNDDIR)/*.mp3 $(DESTSOUNDDIR)
+	touch $(SOUNDTIMESTAMP)
+	cp $(ATTDIR)/*.rar $(DESTATTDIR)
+	touch $(ATTTIMESTAMP)
+
+update_drupal_vars:
+	$(INSTALLSCRIPTS)/updatemission $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
+	$(INSTALLSCRIPTS)/updatedate $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
+	$(INSTALLSCRIPTS)/clear_cache $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
+
+deploy_static: | $(DESTIMAGEDIR) $(DESTSOUNDDIR) $(DESTATTDIR)
 	find $(IMAGEDIR) -type f -exec cp {} $(DESTIMAGEDIR)/ \; 
 	find $(SOUNDDIR) -type f -exec cp {} $(DESTSOUNDDIR)/ \; 
 
@@ -72,6 +87,12 @@ $(DESTIMAGEDIR):
 
 $(DESTSOUNDDIR):
 	mkdir -p $(DESTSOUNDDIR)	
+
+$(DESTATTDIR):
+	mkdir -p $(DESTATTDIR)	
+
+$(DOCUMENT_ROOT):
+	mkdir -p $(DOCUMENT_ROOT) 
 
 $(INITED): | $(WORKDIR)
 	$(CVS) login -p
@@ -137,7 +158,8 @@ $(ALLTIMESTAMP): $(IMAGETIMESTAMP) $(SOUNDTIMESTAMP) $(ATTTIMESTAMP) $(TEXTTIMES
 	$(INSTALLSCRIPTS)/updatedate $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
 	$(INSTALLSCRIPTS)/clear_cache $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
 	touch $(ALLTIMESTAMP)
-	
+
+
 find_created: 
 	cd $(SRCDIR) && cvs log -l -r1.1 *.txt >$(WORKDIR)/cvs_log.txt 
 	$(CURDIR)/find_created.pl $(WORKDIR)/cvs_log.txt >x
@@ -174,3 +196,13 @@ makerating:
 	
 $(RATINGTIMESTAMP): dict/rating_map.txt dict/rating_questions.txt $(TEXTTIMESTAMP)
 	perl makerating.pl
+TEMP:
+	#for image in $? ; do cp $$image $(DESTIMAGEDIR)/ ; done
+
+install_drupal: | $(DOCUMENT_ROOT)
+	cp -ar $(DRUPALSOURCEDIR)/* $(DOCUMENT_ROOT)
+	cp  $(DRUPALSOURCEDIR)/.htaccess $(DOCUMENT_ROOT)
+	if [ ! -d $(DOCUMENT_ROOT)/sites/default/files ];then mkdir $(DOCUMENT_ROOT)/sites/default/files;fi
+	chmod 777 $(DOCUMENT_ROOT)/sites/default/files
+	chmod 777 $(DOCUMENT_ROOT)/sites/default
+	$(INSTALLSCRIPTS)/copy_chgk $(INSTALLSCRIPTS)/$(DB_CHGK_NAME).cnf
