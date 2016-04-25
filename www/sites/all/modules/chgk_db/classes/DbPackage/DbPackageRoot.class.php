@@ -18,7 +18,7 @@ class DbPackageRoot extends DbPackageGroup {
   
   
    
-  public function getHtmlLinkForList() {
+  public function getHtmlLinkForList($withDate = true, $attr = []) {
      return '';
    }
 }
