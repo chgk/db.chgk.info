@@ -200,6 +200,7 @@ TEMP:
 	#for image in $? ; do cp $$image $(DESTIMAGEDIR)/ ; done
 
 install_drupal: | $(DOCUMENT_ROOT)
+	if [  -f $(DOCUMENT_ROOT)/sites/default/settings.php ];then chmod 666 $(DOCUMENT_ROOT)/sites/default/settings.php;fi
 	cp -ar $(DRUPALSOURCEDIR)/* $(DOCUMENT_ROOT)
 	cp  $(DRUPALSOURCEDIR)/.htaccess $(DOCUMENT_ROOT)
 	if [ ! -d $(DOCUMENT_ROOT)/sites/default/files ];then mkdir $(DOCUMENT_ROOT)/sites/default/files;fi

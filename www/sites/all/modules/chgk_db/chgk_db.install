@@ -6,10 +6,10 @@
 function chgk_db_install() {
   // Create tables.
   drupal_install_schema('chgk_db');
-  $result = db_sql('SELECT n.nid, n.sticky, n.created FROM {node} n WHERE n.type="unsorted"');
+  $result = db_query('SELECT n.nid, n.sticky, n.created FROM {node} n WHERE n.type="unsorted"');
 
   while ($node = db_fetch_object($result)) {
-    db_sql("INSERT INTO {unsorted} (nid, vid) VALUES ({$node->nid}, {$node->vid}");
+    db_query("INSERT INTO {unsorted} (nid, vid) VALUES ({$node->nid}, {$node->vid}");
   }
 }
 
@@ -77,3 +77,469 @@ function chgk_db_update_6000() {
   return $items;
 }
 
+
+function chgk_db_import_issue() {
+    $content = [];
+    $content['type']  = array (
+      'name' => 'Сообщение об ошибке',
+      'type' => 'chgk_issue',
+      'description' => '',
+      'title_label' => 'Код вопроса',
+      'body_label' => 'Сообщение',
+      'min_word_count' => '0',
+      'help' => '',
+      'node_options' => 
+      array (
+        'status' => true,
+        'promote' => false,
+        'sticky' => false,
+        'revision' => false,
+      ),
+      'language_content_type' => 0,
+      'upload' => '1',
+      'old_type' => 'chgk_issue',
+      'orig_type' => '',
+      'module' => 'node',
+      'custom' => '1',
+      'modified' => '1',
+      'locked' => '0',
+      'comment' => '2',
+      'comment_default_mode' => '4',
+      'comment_default_order' => '1',
+      'comment_default_per_page' => '50',
+      'comment_controls' => '3',
+      'comment_anonymous' => 0,
+      'comment_subject_field' => '0',
+      'comment_preview' => '0',
+      'comment_form_location' => '0',
+    );
+    $content['fields']  = array (
+      0 => 
+      array (
+        'label' => 'Email',
+        'field_name' => 'field_email',
+        'type' => 'text',
+        'widget_type' => 'text_textfield',
+        'change' => 'Change basic information',
+        'weight' => '31',
+        'rows' => 5,
+        'size' => '60',
+        'description' => '',
+        'default_value' => 
+        array (
+          0 => 
+          array (
+            'value' => '',
+            '_error_element' => 'default_value_widget][field_email][0][value',
+          ),
+        ),
+        'default_value_php' => '',
+        'default_value_widget' => NULL,
+        'required' => 0,
+        'multiple' => '0',
+        'text_processing' => '0',
+        'max_length' => '',
+        'allowed_values' => '',
+        'allowed_values_php' => '',
+        'op' => 'Сохранить настройки поля',
+        'module' => 'text',
+        'widget_module' => 'text',
+        'columns' => 
+        array (
+          'value' => 
+          array (
+            'type' => 'text',
+            'size' => 'big',
+            'not null' => false,
+            'sortable' => true,
+            'views' => true,
+          ),
+        ),
+        'display_settings' => 
+        array (
+          'weight' => '31',
+          'parent' => '',
+          'label' => 
+          array (
+            'format' => 'hidden',
+          ),
+          'teaser' => 
+          array (
+            'format' => 'hidden',
+            'exclude' => 1,
+          ),
+          'full' => 
+          array (
+            'format' => 'default',
+            'exclude' => 1,
+          ),
+          4 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          2 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          3 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          'mobile_tools' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+        ),
+      ),
+      1 => 
+      array (
+        'label' => 'Статус',
+        'field_name' => 'field_issue_status',
+        'type' => 'text',
+        'widget_type' => 'optionwidgets_select',
+        'change' => 'Change basic information',
+        'weight' => '32',
+        'description' => '',
+        'default_value' => 
+        array (
+          0 => 
+          array (
+            'value' => '',
+          ),
+        ),
+        'default_value_php' => '',
+        'default_value_widget' => NULL,
+        'required' => 1,
+        'multiple' => '0',
+        'text_processing' => '0',
+        'max_length' => '',
+        'allowed_values' => 'new|Новое
+    accepted|Принято
+    resolved|Исправлено
+    rejected|Не ошибка',
+        'allowed_values_php' => '',
+        'op' => 'Сохранить настройки поля',
+        'module' => 'text',
+        'widget_module' => 'optionwidgets',
+        'columns' => 
+        array (
+          'value' => 
+          array (
+            'type' => 'text',
+            'size' => 'big',
+            'not null' => false,
+            'sortable' => true,
+            'views' => true,
+          ),
+        ),
+        'display_settings' => 
+        array (
+          'weight' => '32',
+          'parent' => '',
+          'label' => 
+          array (
+            'format' => 'inline',
+          ),
+          'teaser' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          'full' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          4 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          2 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          3 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          'mobile_tools' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+        ),
+      ),
+      2 => 
+      array (
+        'label' => 'Категория',
+        'field_name' => 'field_issue_category',
+        'type' => 'number_integer',
+        'widget_type' => 'optionwidgets_select',
+        'change' => 'Change basic information',
+        'weight' => '33',
+        'description' => '',
+        'default_value' => 
+        array (
+          0 => 
+          array (
+            'value' => '',
+          ),
+        ),
+        'default_value_php' => '',
+        'default_value_widget' => NULL,
+        'required' => 1,
+        'multiple' => '0',
+        'min' => '',
+        'max' => '',
+        'prefix' => '',
+        'suffix' => '',
+        'allowed_values' => '1|Фактическая ошибка в вопросе
+    3|Опечатка в вопросе
+    2|Что-то не работает',
+        'allowed_values_php' => '',
+        'op' => 'Сохранить настройки поля',
+        'module' => 'number',
+        'widget_module' => 'optionwidgets',
+        'columns' => 
+        array (
+          'value' => 
+          array (
+            'type' => 'int',
+            'not null' => false,
+            'sortable' => true,
+          ),
+        ),
+        'display_settings' => 
+        array (
+          'weight' => '33',
+          'parent' => '',
+          'label' => 
+          array (
+            'format' => 'inline',
+          ),
+          'teaser' => 
+          array (
+            'format' => 'default',
+            'exclude' => 1,
+          ),
+          'full' => 
+          array (
+            'format' => 'default',
+            'exclude' => 1,
+          ),
+          4 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          2 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          3 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          'mobile_tools' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+        ),
+      ),
+      3 => 
+      array (
+        'label' => 'Цеплять к вопросу',
+        'field_name' => 'field_issue_2q',
+        'type' => 'number_integer',
+        'widget_type' => 'optionwidgets_buttons',
+        'change' => 'Change basic information',
+        'weight' => '34',
+        'description' => '',
+        'default_value' => 
+        array (
+          0 => 
+          array (
+            'value' => NULL,
+          ),
+        ),
+        'default_value_php' => '',
+        'default_value_widget' => NULL,
+        'required' => 0,
+        'multiple' => '1',
+        'min' => '',
+        'max' => '',
+        'prefix' => '',
+        'suffix' => '',
+        'allowed_values' => '1|Цеплять к вопросу',
+        'allowed_values_php' => '',
+        'op' => 'Сохранить настройки поля',
+        'module' => 'number',
+        'widget_module' => 'optionwidgets',
+        'columns' => 
+        array (
+          'value' => 
+          array (
+            'type' => 'int',
+            'not null' => false,
+            'sortable' => true,
+          ),
+        ),
+        'display_settings' => 
+        array (
+          'weight' => '34',
+          'parent' => '',
+          'label' => 
+          array (
+            'format' => 'hidden',
+          ),
+          'teaser' => 
+          array (
+            'format' => 'hidden',
+            'exclude' => 1,
+          ),
+          'full' => 
+          array (
+            'format' => 'default',
+            'exclude' => 1,
+          ),
+          4 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          2 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          3 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          'mobile_tools' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+        ),
+      ),
+      4 => 
+      array (
+        'label' => 'Сообщил',
+        'field_name' => 'field_reporter',
+        'type' => 'text',
+        'widget_type' => 'text_textfield',
+        'change' => 'Change basic information',
+        'weight' => '35',
+        'rows' => 5,
+        'size' => '60',
+        'description' => '',
+        'default_value' => 
+        array (
+          0 => 
+          array (
+            'value' => '',
+            '_error_element' => 'default_value_widget][field_reporter][0][value',
+          ),
+        ),
+        'default_value_php' => '',
+        'default_value_widget' => NULL,
+        'required' => 0,
+        'multiple' => '0',
+        'text_processing' => '0',
+        'max_length' => '',
+        'allowed_values' => '',
+        'allowed_values_php' => '',
+        'op' => 'Сохранить настройки поля',
+        'module' => 'text',
+        'widget_module' => 'text',
+        'columns' => 
+        array (
+          'value' => 
+          array (
+            'type' => 'text',
+            'size' => 'big',
+            'not null' => false,
+            'sortable' => true,
+            'views' => true,
+          ),
+        ),
+        'display_settings' => 
+        array (
+          'weight' => '35',
+          'parent' => '',
+          'label' => 
+          array (
+            'format' => 'inline',
+          ),
+          'teaser' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          'full' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          4 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          2 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          3 => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+          'mobile_tools' => 
+          array (
+            'format' => 'default',
+            'exclude' => 0,
+          ),
+        ),
+      ),
+    );
+    $content['extra']  = array (
+      'title' => '-5',
+      'body_field' => '0',
+      'revision_information' => '20',
+      'author' => '20',
+      'options' => '25',
+      'comment_settings' => '30',
+      'menu' => '-2',
+      'attachments' => '30',
+    );
+
+    function chgk_db_import_type($content) {
+      $type = (object) $content['type'];
+      $values = $content['type'];
+      $type->has_title = TRUE;
+      $type_form_state = array('values' => $values);
+      drupal_execute('node_type_form', $type_form_state, $type);
+      $imported_fields = isset($content['fields']) ? $content['fields'] : array();
+      foreach ($imported_fields as $field) {
+        $field_name   = $field['field_name'];
+        $field['type_name'] = $type_name;
+        $field = content_field_instance_create($field, FALSE);
+      }
+
+    }
+
+} 
