@@ -233,7 +233,11 @@ if ($c++) {
   
   public function getTextId() {
     if ( 1|| ! $this->textId ) {
-      $this->question->TextId = $this->textId = $this->getTour()->getId().'-'.$this->getNumber();
+      $tourId = $this->getTour()->getId();
+      if (!preg_match('/\.\d+$/', $tourId)) {
+        $tourId .= '.1';
+      }	
+      $this->question->TextId = $this->textId = $tourId.'-'.$this->getNumber();
     }
     return $this->textId;
   }
