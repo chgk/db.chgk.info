@@ -185,7 +185,7 @@ class DbField {
 
   public function formatHtml() {
     $this->html = preg_replace('/(\s+)-+(\s+)/','\1&mdash;$2', $this->html);
-    $this->html = preg_replace('/^((\|[^\n]*\n?)+)/m',"<pre>\n\$1\n</pre>", $this->html);
+    $this->html = preg_replace('/^((\|[^\n]*\n?)+)/m',"</p><pre>\n\$1</pre><p>\n", $this->html);
     $this->html = preg_replace('/\[Раздаточный материал:(.*?)\]\s*\n/sm',
         "<div class=\"razdatka\"><div class=\"razdatka_header\">Раздаточный материал</div> \\1</div>\n",
          $this->html  );
