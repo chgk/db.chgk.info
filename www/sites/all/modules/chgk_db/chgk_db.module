@@ -1359,6 +1359,7 @@ function chgk_db_mail($key, &$message, $params) {
 }
 
 function chgk_db_mail_alter(&$message) {
+  $message['headers']['Reply-To'] = $message['headers']['From'];
   $message['headers']['From'] = $message['headers']['Sender'];
   $message['from'] = $message['headers']['Sender'];
 }

@@ -300,7 +300,7 @@ class DbPackage {
   public function getToursList() {
     $tours = $this->tour->tours;
     if (!$tours) return false;
-    $a = explode(',', $tours);
+    $a = explode('::', $tours);
     if (sizeof($a) == 1) return false;
     $thisLink = $this->getLink();
     $i=0;
