@@ -23,6 +23,7 @@ if ( chgk_db_is_main_host() ) {
                        $o['host'] = 'db.chgk.info';
 
                             $sape = new SAPE_client();
+
                             unset($o);
 
 }
@@ -774,7 +775,6 @@ function chgk_db_fb2($string) {
   if ( is_file( $zip_real_path ) && (date("Y-m-d H:i:s", filemtime( $zip_real_path ) ) > $last_updated )) {
     drupal_goto( $zip_path );
   }
-
   $xml = $tournament->getFb2();
   if (!$xml) {
      print "Something is wrong :(";
