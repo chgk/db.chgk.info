@@ -17,12 +17,12 @@ if ( chgk_db_is_main_host() ) {
     if (  !defined('_SAPE_USER')){
              define('_SAPE_USER', '2216c1e54aaa5b09f81f7bb542e16991'); 
                   }
-                       require_once($_SERVER['DOCUMENT_ROOT'].'/'._SAPE_USER.'/sape.php'); 
+#                       require_once($_SERVER['DOCUMENT_ROOT'].'/'._SAPE_USER.'/sape.php'); 
                        $o['charset'] = 'UTF-8';                       
                        $o['verbose'] = true;
                        $o['host'] = 'db.chgk.info';
 
-                            $sape = new SAPE_client();
+#                            $sape = new SAPE_client();
 
                             unset($o);
 
@@ -775,6 +775,7 @@ function chgk_db_fb2($string) {
   if ( is_file( $zip_real_path ) && (date("Y-m-d H:i:s", filemtime( $zip_real_path ) ) > $last_updated )) {
     drupal_goto( $zip_path );
   }
+
   $xml = $tournament->getFb2();
   if (!$xml) {
      print "Something is wrong :(";

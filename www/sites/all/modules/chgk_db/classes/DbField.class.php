@@ -17,7 +17,8 @@ class DbField {
   protected $imageBaseUrl='/images/db';
   const SOUNDS_BASE_URL='/sounds/db';
 #  const MP3_PLAYER_TEMPLATE= '<embed type="application/x-shockwave-flash" src="http://www.google.com/reader/ui/3523697345-audio-player.swf?audioUrl=%s"  allowscriptaccess="never" width="400" height="27" quality="best" bgcolor="#ff0000" wmode="window" flashvars="playerMode=embedded" />';
-  const MP3_PLAYER_TEMPLATE= '<embed type="application/x-shockwave-flash" src="/sounds/3523697345-audio-player.swf?audioUrl=%s"  allowscriptaccess="never" width="400" height="27" quality="best" bgcolor="#ff0000" wmode="window" flashvars="playerMode=embedded" />';
+//  const MP3_PLAYER_TEMPLATE= '<embed type="application/x-shockwave-flash" src="/sounds/3523697345-audio-player.swf?audioUrl=%s"  allowscriptaccess="never" width="400" height="27" quality="best" bgcolor="#ff0000" wmode="window" flashvars="playerMode=embedded" />';
+  const MP3_PLAYER_TEMPLATE = '<p><audio src="%s" controls></audio></p>';
 
   public function __construct($field, $value, $number = false, $parent = null) {
     $this->field = $field;
