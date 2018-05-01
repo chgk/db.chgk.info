@@ -202,3 +202,44 @@ body #name-and-slogan h1 a, body #name-and-slogan h1 a:hover {
 .incorrect{ 
   background-color: #FFF5F5;
 }
+
+
+.chgkdb-package p.first {
+  display: inline;
+}
+.chgkdb-package div.field {
+  margin-top: 0.5em;
+  margin-bottom: 0.9em;
+}
+.chgkdb-package .field p {
+  margin-top: 3px;
+  margin-bottom: 3px;
+  text-indent: 2em;
+}
+.chgkdb-package div.razdatka {
+  background-color: #EEEEFF;
+  padding: 4px;
+  margin-top: 35px;
+  border: 1px solid black;
+}
+.chgkdb-package div.razdatka:before {
+  content: "Раздаточный материал";
+  margin-top: -31px;
+  margin-bottom: 9px;
+  margin-left: -5px;
+  padding-left: 4px;
+  display: block;
+  border: 1px solid black;
+  background-color: #EEEEFF;
+  width: 230px;
+  height: 25px;
+}
+
+.chgkdb-package audio {
+  width: 600px;
+}
+
+.chgkdb-package .comment {
+  border-style: none;
+  padding: 0px;
+}
