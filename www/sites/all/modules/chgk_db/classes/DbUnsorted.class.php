@@ -82,17 +82,28 @@ class DbUnsorted {
   }
 
   public function getCheckedHTML() {
-    try {
-      $package = $this->getPackage();
-    } catch( DbParserException $e ) {
-      return $this->getErrorHTML( $e );
-    }
+      $text = $this->getSourceText();
+      if (!preg_match('/^(Чемпионат|Пакет):/u', $text)) {
+          $text = "Чемпионат:\n".$this->node->title."\n\n".$this->getSourceText();
+      }
+      $api = variable_get('chgk_api', 'http://api.baza-voprosov.ru/');
+      $r = drupal_http_request($api.'questions/validate', ['Content-type' => 'application/json'], 'POST',
+          json_encode(['text'=>$text]));
+      $data = json_decode($r->data);
+      $result = '';
+      if ($r->code == 200) {
+          $result .= $data->html;
+      } elseif($r->code == 400) {
+          drupal_set_message($data->error, 'error');
 
-    
-    $t = $this->getPreText();
-
-
-    return $t . $package->getHtmlContent();
+          $lines = preg_split('/\r\n|\r|\n/', $text);
+          $lines[$data->line] = '<p style="background-color:#ffaaaa">'.$lines[$data->line]."</p>";
+          $t = implode("\n", $lines);
+          $result.="<pre>$t</pre>";
+      } else {
+          drupal_set_message('Api communication error. Please try later', 'error');
+      }
+      return $result;
   }
 
   private function getPreText() {
