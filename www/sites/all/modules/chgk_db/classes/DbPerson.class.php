@@ -185,7 +185,14 @@ class DbPerson {
       }
     }
     $output.="</div>";
-    $add = $this->getEditorWorksHTML() . $this->getQuestionsHTML();
+    $key = __METHOD__.":".$this->user->uid;
+    $cached = cache_get($key);
+    if ($cached) {
+        $add = $cached->data;
+    } else {
+        $add = $this->getEditorWorksHTML() . $this->getQuestionsHTML();
+        cache_set($key, $add, 'cache', 7200);
+    }
     if ( $add ) $output.= "$add\n";
     return $output;
   }
