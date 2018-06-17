@@ -461,5 +461,8 @@ class DbDatabase  {
     return db_query($sql);    
   }
 
+  public function getUnsortedNodeId($textId) {
+    return db_result(db_query('SELECT nid FROM {unsorted} WHERE text_id = "%s"', $textId));
+  }
 }
 

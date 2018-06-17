@@ -2,11 +2,11 @@
 
 $conf['chgk_db'] = 'chgk';
 $conf['sphinx_index'] = 'chgk';
-$conf['sphinx_host'] = '127.0.0.1';
+$conf['sphinx_host'] = 'localhost';
 $conf['sphinx_port'] = 9312;
 
-$conf['main_site'] = 'http://db.chgk.info';
-$conf['image_domain'] = 'db.chgk.info';
+$conf['main_site'] = 'https://db.chgk.info';
+$conf['image_domain'] = '';
 
 $db_prefix = array(
   'Questions' => $conf['chgk_db'].'.',
@@ -112,8 +112,22 @@ $conf['locale_custom_strings_ru'] = array(
      => 'Выберите ваше текущую временную зону',
 
   'Apply' => 'Применить',
-  'Items per page' => 'На странице'
-  
+  'Items per page' => 'На странице',
+  'More information about formatting options' => '',
+  'Revision information' => 'Информация о версии',
+  'Log message' => 'Комментарий к исправлению',
+  'An explanation of the additions or updates being made to help other authors understand your motivations.' =>
+    'Если вы вносите исправление, поясните здесь, почему вы это делаете',
+  'File attachments' => 'Дополнительные материалы',
+  'Create content' => 'Добавить',
+  'Changes made to the attachments are not permanent until you save this post. The first "listed" file will be included in RSS feeds.'
+    => 'Файлы будут прикреплены только после сохранения',
+  'Attach new file' => 'Прикрепить новый файл',
+  'The maximum upload size is %filesize. Only files with the following extensions may be uploaded: %extensions. ' => '',
+  'Attach' => 'Прикрепить',
+  'View' => 'Просмотр',
+  'Revisions' => 'История',
+  '!name field is required.' => 'Не заполнено поле "!name"',
 );
 
 

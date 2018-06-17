@@ -21,12 +21,13 @@ class DbField {
   const MP3_PLAYER_TEMPLATE = '<p><audio src="%s" controls></audio></p>';
 
   public function __construct($field, $value, $number = false, $parent = null) {
+    global $base_url;
     $this->field = $field;
     $this->value = $value;
     $this->number = $number;
     $this->parent = $parent;
     $imageDomain=variable_get('image_domain', $_SERVER['HTTP_HOST']);
-    $this->imageBaseUrl='http://'. $imageDomain .'/images/db';
+    $this->imageBaseUrl=variable_get('image_host', $base_url).'/images/db';
   }
 
 
@@ -186,7 +187,7 @@ class DbField {
 
   public function formatHtml() {
     $this->html = preg_replace('/(\s+)-+(\s+)/','\1&mdash;$2', $this->html);
-    $this->html = preg_replace('/^((\|[^\n]*\n?)+)/m',"</p><pre>\n\$1</pre><p>\n", $this->html);
+    $this->html = preg_replace('/^((\|[^\n]*\n?)+)/m',"<pre>\n\$1\n</pre>", $this->html);
     $this->html = preg_replace('/\[Раздаточный материал:(.*?)\]\s*\n/sm',
         "<div class=\"razdatka\"><div class=\"razdatka_header\">Раздаточный материал</div> \\1</div>\n",
          $this->html  );
@@ -203,7 +204,10 @@ class DbField {
 
 #    $this->html = preg_replace('/\(pic: ([^\)]*)\)/','<br /><img src="'.$this->getImageBaseUrl().'/$1"><br />', $this->html);
     $iregexp = '/\(pic: ([^\)]*)\)/';
-    $this->html = preg_replace('/\(pic: ([^\)]*)\)/e','"<br /><img src=\"".$this->getImageUrl(\'$1\')."\"><br />"', $this->html);
+ #   $this->html = preg_replace('/\(pic: ([^\)]*)\)/e','"<br /><img src=\"".$this->getImageUrl(\'$1\')."\"><br />"', $this->html);
+    $this->html=preg_replace_callback('/\(pic: ([^\)]*)\)/', function ($matches) {
+        return sprintf('<br/><img src="%s"><br/>', $this->getImageUrl($matches[1]));
+    }, $this->html);
     $this->addSoundsToHtml();
     if ($this->getSearchString()) {
         $this->highLight();
@@ -211,7 +215,7 @@ class DbField {
   }
   
   protected function getImageUrl( $name  ) {
-    if ( preg_match( '/\d{8}\./', $name ) ) {
+    if ( preg_match( '/^\d{8}/', $name ) ) {
       $result =  $this->getImageBaseUrl()."/".$name;
     } elseif ( $attachment = $this->parent->getAttachment( $name ) ) {
           $result = url( $attachment->filepath );

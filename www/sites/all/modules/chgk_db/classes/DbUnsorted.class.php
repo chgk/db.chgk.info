@@ -6,12 +6,24 @@ class DbUnsorted {
   protected $questions;
   private $publishedPackage = NULL;
 
+  const TEXT_ID_POSTFIX = '_u';
+
   public function __construct( $node ) {
     if ( is_object( $node ) ) {
       $this->node = $node;
     } else {
       $this->node = node_load( $node );
     }
+  }
+
+  public static function newFromTextId($textId) {
+    $db = new DbDatabase();
+    $nid = $db->getUnsortedNodeId($textId);
+    if (!$nid) {
+      return null;
+    }
+    $node = node_load(['nid' => $nid]);
+    return new self($node);
   }
 
   private function parse() {
@@ -88,11 +100,13 @@ class DbUnsorted {
       }
       $api = variable_get('chgk_api', 'http://api.baza-voprosov.ru/');
       $r = drupal_http_request($api.'questions/validate', ['Content-type' => 'application/json'], 'POST',
-          json_encode(['text'=>$text]));
+          json_encode(['text'=>$text, 'outputFormat' => 'html']));
       $data = json_decode($r->data);
       $result = '';
       if ($r->code == 200) {
-          $result .= $data->html;
+          $result .= $data->result;
+          $this->node->checked = true;
+          node_save($this->node);
       } elseif($r->code == 400) {
           drupal_set_message($data->error, 'error');
 
@@ -100,6 +114,8 @@ class DbUnsorted {
           $lines[$data->line] = '<p style="background-color:#ffaaaa">'.$lines[$data->line]."</p>";
           $t = implode("\n", $lines);
           $result.="<pre>$t</pre>";
+          $this->node->checked = false;
+          node_save($this->node);
       } else {
           drupal_set_message('Api communication error. Please try later', 'error');
       }
@@ -134,7 +150,7 @@ class DbUnsorted {
   }
 
   protected function getSourceText() {
-    return $this->node->body;
+    return str_replace("\r\n", "\n", $this->node->body);
   } 
   
   protected function getErrorHTML( $e ) {
@@ -201,27 +217,74 @@ class DbUnsorted {
   }
   
   public function publish() {
-    try {
-       $p = $this->getPackage( array( 'Title' => $this->node->title ) );
-    } catch( DbParserException $e ) {
-      drupal_goto('node/'.$this->node->nid."/check");
-    }
+      $textId = $this->node->text_id;
+      if (!$textId) {
+          drupal_set_message('Не указан текстовый идентификатор', 'error');
+          drupal_goto('node/'.$this->node->nid.'/edit');
+      } else {
+        $db = new DbDatabase();
+        $t = $db->getTournamentByTextId($textId);
+        if (!$this->isPublishedByUser() && $t) {
+          drupal_set_message("Текстовый идентификатор {$textId} уже используется", 'error');
+          drupal_goto('node/'.$this->node->nid);
+        }
+          $api = variable_get('chgk_api', 'http://api.baza-voprosov.ru/');
+          $sourceText = $this->getSourceText();
+          $r = drupal_http_request(
+              $api.'questions/validate',
+              ['Content-type' => 'application/json'],
+              'POST',
+              json_encode(['text' => $sourceText, 'outputFormat' => 'json', 'textId' => $textId])
+          );
+          $data = json_decode($r->data);
+          if ($this->isPublishedByUser()) {
+            $r = drupal_http_request(
+              $api . 'packages/'.$textId,
+              ['Content-type' => 'application/json'],
+              'PUT',
+              $data->result
+            );
+          } else {
+            $r = drupal_http_request(
+              $api . 'packages',
+              ['Content-type' => 'application/ld+json'],
+              'POST',
+              $data->result
+            );
 
-    $p->setId('pub'.$this->node->nid);
-    $p->save();
-    drupal_set_message('Пакет "'. $this->node->title .'" опубликован. Он будет доступен для поиска примерно через сутки.');
-    drupal_goto('node/'.$this->node->nid);
+          }
+          if ($r->code>=400) {
+            drupal_set_message('Не удалось опубликовать', 'error');
+            drupal_goto('node/'.$this->node->nid);
+          }
+          if ($r->code < 300 ) {
+            $this->node->published = true;
+            node_save($this->node);
+            drupal_set_message('Пакет успешно опубликован');
+
+            drupal_goto('tour/'.$this->node->text_id);
+          }
+      }
   }
 
   public function unpublish() {
-    $p = $this->getPublishedPackage();
-    if ( $p ) {
-      $p->delete();
+    $api = variable_get('chgk_api', 'http://api.baza-voprosov.ru/');
+
+    $r = drupal_http_request(
+      $api.'packages/'.$this->node->text_id,
+      ['Content-type' => 'application/json'],
+      'DELETE');
+    if ($r->code == 204) {
+      $this->node->published = false;
+      node_save($this->node);
       drupal_set_message('Пакет "'. $this->node->title .'" удалён из основной базы');
     } else {
-      drupal_set_message('Не удалос удалить пакет "'. $this->node->title );      
+      drupal_set_message('Не удалось удалить пакет "'. $this->node->title );
     }
     drupal_goto('node/'.$this->node->nid);
   }
 
+  public function isPublishedByUser() {
+    return (bool)$this->node->published;
+  }
 }

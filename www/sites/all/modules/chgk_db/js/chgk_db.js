@@ -66,6 +66,13 @@ Drupal.behaviors.chgk_db_collapse = function (context) {
   link.click(Drupal.chgk_db_toggleAll);
 };
 
+Drupal.behaviors.chgk_db_unsorted = function () {
+    jQuery('.node-type-unsorted #edit-body').keyup(function () {
+        jQuery('#check_tab').hide();
+        return false;
+    })
+};
+
 Drupal.theme.prototype.CToolsChgkDbModal = function () {
   var html = '';
   html += '<div id="ctools-modal">';

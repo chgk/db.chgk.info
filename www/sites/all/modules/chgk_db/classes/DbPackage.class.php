@@ -251,7 +251,7 @@ class DbPackage {
           $file = fopen($name,'rb');
         } else {
           $imageDomain=variable_get('image_domain', $_SERVER['HTTP_HOST']);
-          $file = fopen( "http://$imageDomain/images/db/$i", 'rb' );
+          $file = fopen( "https://$imageDomain/images/db/$i", 'rb' );
           if (!$file) {
             drupal_set_message("Не получилось открыть изображение $i", 'warning');
           }

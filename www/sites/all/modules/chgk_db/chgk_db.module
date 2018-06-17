@@ -23,7 +23,6 @@ if ( chgk_db_is_main_host() ) {
                        $o['host'] = 'db.chgk.info';
 
                             $sape = new SAPE_client();
-
                             unset($o);
 
 }
@@ -80,17 +79,29 @@ function chgk_db_menu() {
     'access callback' => "chgk_db_access",
     'type' => MENU_CALLBACK
   );
+
+  $items['tour/%/edit'] = [
+      'path' => 'edit',
+      'title' => 'Редактировать',
+      'page callback' => 'chgk_db_tour_edit',
+      'access callback' => 'chgk_db_access',
+      'access arguments' => [1, 'edit'],
+      'page arguments' => array(1),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 1
+  ];
   $items['tour/%/noanswers'] = array(
     'path' => 'noanswers',
     'title' => 'Без ответов',
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'chgk_db_tour_noanswers',
     'page arguments' => array(1),
-    'access callback' => "chgk_db_access", 
+    'access callback' => "chgk_db_access",
     'access arguments' => array(1, 'print'),
 
-      'weight' => 2
+    'weight' => 2
   );
+
 
   $items['tour/%/print'] = array(
     'path'  => 'print',
@@ -135,7 +146,7 @@ function chgk_db_menu() {
     'page arguments' => array(1),
     'access callback' => "unsorted_access",
     'access arguments' => array('check', 1),    
-    'type' => MENU_NORMAL_ITEM,    
+    'type' => MENU_NORMAL_ITEM,
   );
 
   $items['node/%node/unpublish'] = array(
@@ -539,7 +550,10 @@ function unsorted_delete($node) {
 function unsorted_insert($node) {
   if ($node->type == 'unsorted') {
   db_query("INSERT INTO {unsorted} 
-    (vid, nid, archived, text_id) VALUES (%d, %d, %d, '%s')", $node->vid, $node->nid, $node->archived, $node->text_id);
+    (vid, nid, archived, text_id, published, checked) 
+    VALUES (%d, %d, %d, '%s', %d, %d)",
+    $node->vid, $node->nid, $node->archived, $node->text_id, $node->published, $node->checked
+  );
   }
 }
 
@@ -558,12 +572,16 @@ function unsorted_access($op, $node) {
        return TRUE;
      }
   }
+
+  if ($op == 'publish') {
+    return $node->checked && (($user->uid == $node->uid) || user_access('edit any unsorted node'));
+  }
   return FALSE;
                                   
 }
 
 function unsorted_load($node) {
-  $additions = db_fetch_object(db_query('SELECT archived, text_id FROM {unsorted} WHERE vid = %d', $node->vid));
+  $additions = db_fetch_object(db_query('SELECT archived, text_id, checked, published FROM {unsorted} WHERE vid = %d', $node->vid));
   return $additions;
 }
 
@@ -573,49 +591,102 @@ function unsorted_form(&$node) {
   // the fields should be labeled. We need to load these settings so we can
   // build the node form correctly.
   $type = node_get_types('type', $node);
+  $unsorted = new DbUnsorted($node);
   if ($type->has_title) {
     $form['title'] = array(
       '#type' => 'textfield',
       '#title' => check_plain($type->title_label),
       '#required' => TRUE,
       '#default_value' => $node->title,
-      '#weight' => -5
+      '#weight' => -5,
     );
   }
 
   if ($type->has_body) {
     $form['body_field'] = node_body_field($node, $type->body_label, $type->min_word_count);
   }
-  if (user_access('archive unsorted')) {
-    // Now we define the form elements specific to our node type.
-    $form['text_id'] = array(
+
+  $form['checked'] = [
+      '#type' => 'value',
+      '#value' => $node->checked
+  ];
+
+  $form['archived'] = [
+    '#type' => 'value',
+    '#value' => $node->archived
+  ];
+
+  $form['published'] = [
+    '#type' => 'value',
+    '#value' => $node->published
+  ];
+
+  if (user_access('archive unsorted') || $node->checked) {
+      // Now we define the form elements specific to our node type.
+    $form['text_id'] = [
       '#type' => 'textfield',
       '#title' => t('Текстовый идентификатор'),
       '#default_value' => isset($node->text_id) ? $node->text_id : '',
       '#size' => 8,
-      '#maxlength' => 8
-    );
+      '#maxlength' => 8,
+      '#description' => 'Если вы собираетесь опубликовать пакет, то значение поля должно заканчиваться на "_u".',
+      '#attributes' => ['style' => 'width:70px;display:inline-block'],
+    ];
+  }
+  else {
+    $form['text_id'] = [
+      '#type' => 'value',
+      '#value' => $node->text_id
+    ];
+  }
+  if (user_access('archive unsorted')) {
     $form['archived'] = array(
       '#type' => 'checkbox',
       '#title' => 'Архивировано',
       '#default_value' => isset($node->archived) ? $node->archived : false,
     );
-    
   }
 
   return $form;
 }
 
+function chgk_db_publish($form, $form_state)
+{
+    $a = 1;
+}
 
 
 function unsorted_update($node) {
   // if this is a new node or we're adding a new revision,
-  
+  $basePath = $_SERVER['DOCUMENT_ROOT'];
+  foreach ($node->files as $file) {
+    if (!is_array($file)) {
+      continue;
+    }
+    $source = $basePath.'/'.$file['filepath'];
+    $name = basename($source);
+    $image_path = $basePath.'/images/db/'.$name;
+    if (!file_exists($image_path)) {
+      copy($source, $image_path);
+    }
+  }
   if ($node->revision) {
     unsorted_insert($node);
   }
   else {
-    db_query("UPDATE {unsorted} SET text_id = '%s', archived = %d WHERE vid = %d", $node->text_id, $node->archived, $node->vid);
+      $old = node_load($node->nid);
+      if ($old->published && $node->text_id!=$old->text_id) {
+        drupal_set_message('Нельзя изменить идентификатор опубликованного пакета');
+        return;
+      }
+      db_query(
+          "UPDATE {unsorted} SET text_id = '%s', archived = %d, checked=%d, published=%d WHERE vid = %d",
+          $node->text_id,
+          $node->archived,
+          $node->checked,
+          $node->published,
+          $node->vid
+      );
   }
 }
 
@@ -775,6 +846,7 @@ function chgk_db_fb2($string) {
   if ( is_file( $zip_real_path ) && (date("Y-m-d H:i:s", filemtime( $zip_real_path ) ) > $last_updated )) {
     drupal_goto( $zip_path );
   }
+
   $xml = $tournament->getFb2();
   if (!$xml) {
      print "Something is wrong :(";
@@ -801,7 +873,14 @@ function chgk_db_access($tour=NULL, $action ='') {
     if (!$tournament->hasPrintVersion()) {
       return FALSE;
     }  
-  } 
+  } elseif ($action == 'edit') {
+    $db = new DbDatabase();
+    $unsorted = DbUnsorted::newFromTextId($tour);
+    if (!$unsorted ||!$unsorted->isPublishedByUser()) {
+      return FALSE;
+    }
+    return unsorted_access('update', $unsorted->node);
+  }
   return TRUE;
 }
 
@@ -836,17 +915,30 @@ function chgk_db_form_alter(&$form, &$form_state, $form_id) {
     $form['#submit'][] = 'chgk_db_profile_submit';
     $form['#validate'][] = 'chgk_db_profile_validate';
   }
+  if ($form_id == 'unsorted_node_form') {
+    unset($form['buttons']['preview']);
+    if ($form['#node']->published) {
+      $form['text_id']['access'] = false;
+    }
+    if (!$form['#node']->nid) {
+      drupal_set_title('Добавить пакет');
+    }
+    $form['body_field']['teaser_include'] = array(
+      '#type' => 'value',
+      '#value' => TRUE,
+    );
+    $form['#validate'][] = 'chgk_db_unsorted_validate';
 
-/*  if ($form_id == 'unsorted_node_form') {
-      node_load($form['#node']);
-      $form['archived'] = array(
-          '#type' => 'checkbox',
-          '#title' => 'Архивировано',
-          '#default_value' => $form['#node']->archived
-      );
   }
-*/
-  
+}
+
+function chgk_db_unsorted_validate($form, &$form_state) {
+#  $textId = $form_state['values']['text_id'] = $form_state['values']['text_id'].'_u';
+
+#  $p = DbUnsorted::newFromTextId($textId);
+#  if ($p && $p->node->nid != $form_state['values']['nid']) {
+#    form_set_error( 'profile_charid', 'Идентификатор уже используется' );
+#  }
 }
 
 
@@ -955,14 +1047,52 @@ function chgk_db_get_people_instance() {
     return $instance;
 }
 
+function chgk_db_preprocess_page(&$vars) {
+//    print_r($vars);
+    $vars['tabs'] = preg_replace('/<li(.*Проверить<)/', '<li id="check_tab"$1', $vars['tabs']);
+}
+
 function unsorted_view($node, $teaser = FALSE, $page = FALSE) {
-  $node = node_prepare($node, $teaser);
-  if ($node->text_id) {
-    $node->content['body']['#value'] =
-          '<p>'.l('В Базе','tour/'.$node->text_id)."</p>\n".
-                  $node->content['body']['#value'];
+  $node->content['body'] = array(
+    '#value' => $teaser ? "<pre>".htmlspecialchars($node->teaser)."</pre>" : "<pre>".htmlspecialchars($node->body)."</pre>",
+    '#weight' => 0,
+  );
+
+#   $node = node_prepare($node, $teaser);
+  if ($node->text_id && ($node->archived ||$node->published)) {
+    $db = new DbDatabase();
+    $tour = $db->getTournamentByTextId($node->text_id);
+    if ($tour) {
+      $node->content['body']['#value'] =
+        '<p>' . l('В Базе', 'tour/' . $node->text_id) . "</p>\n" .
+        $node->content['body']['#value'];
+    }
   }
+
+  $node->content['body']['#value'] = chgk_db_get_unsorted_pre_publish_text($node).$node->content['body']['#value'];
+
   return $node;
+}
+
+function chgk_db_get_unsorted_pre_publish_text($node)
+{
+  if (!unsorted_access('publish', $node)) {
+    return '';
+  }
+
+
+  if (!$node->checked) {
+    return 'Для того, чтобы добавить пакет в базу, сперва '.
+      l('Проверьте формат', "node/{$node->nid}/check").'.';
+  }
+
+  if (!$node->text_id || !preg_match('/'.DbUnsorted::TEXT_ID_POSTFIX.'$/', $node->text_id)) {
+    return 'Чтобы опубликовать пакет в основной базе, '.l('укажите', "node/{$node->nid}/edit").
+      ' текстовый идентификатор, заканчивающийся на "_u"';
+  }
+
+  return drupal_get_form('chgkdb_publish_form');
+
 }
 
 #function chgk_db_forms($form_id, $args) {
@@ -1359,7 +1489,6 @@ function chgk_db_mail($key, &$message, $params) {
 }
 
 function chgk_db_mail_alter(&$message) {
-  $message['headers']['Reply-To'] = $message['headers']['From'];
   $message['headers']['From'] = $message['headers']['Sender'];
   $message['from'] = $message['headers']['Sender'];
 }
@@ -1449,3 +1578,56 @@ function chgk_db_exit($destination = NULL) {
       }
   }
 }
+
+function chgkdb_publish_form() {
+  $node = node_load(arg(1));
+  $form = [];
+  $form['publish'] = [
+    '#name' => 'publish',
+    '#type' =>'submit',
+    '#value' => $node->published ? 'Перепубликовать' : 'Опубликовать'
+  ];
+  if ($node->published) {
+    $form['unpublish'] = [
+      '#name' => 'unpublish',
+      '#type' => 'submit',
+      '#value' => 'Снять с публикации'
+    ];
+  }
+  $form['nid'] = [
+    '#type' => 'value',
+    '#value' => arg(1)
+  ];
+
+  return $form;
+}
+
+function chgkdb_publish_form_submit($form, &$form_state) {
+  $v = $form_state['values'];
+  module_load_include('class.php', 'chgk_db', 'classes/DbUnsorted');
+  $node = node_load(['nid' => $v['nid']]);
+  $instance = new DbUnsorted ($node);
+
+  if ($form_state['clicked_button']['#name'] === 'unpublish') {
+    $instance->unpublish();
+  } elseif ($form_state['clicked_button']['#name'] === 'publish') {
+    $instance->publish();
+  }
+}
+
+
+function chgk_db_tour_edit($textId) {
+  $textId = arg(1);
+  if (!$textId) {
+    return drupal_not_found();
+  }
+
+  $db = new DbDatabase();
+
+  $nid = $db->getUnsortedNodeId($textId);
+  if (!$nid) {
+    return drupal_not_found();
+  }
+  drupal_goto('node/'.$nid.'/edit');
+}
+
