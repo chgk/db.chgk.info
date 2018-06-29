@@ -185,7 +185,7 @@ class DbPerson {
       }
     }
     $output.="</div>";
-    $key = __METHOD__.":".$this->user->uid;
+    $key = __METHOD__.":".$this->person->CharId;
     $cached = cache_get($key);
     if ($cached) {
         $add = $cached->data;
