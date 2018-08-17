@@ -338,14 +338,23 @@ class DbDatabase  {
   }
   
   
-  public function getLastTournamentsRes($number = 10) {
+  public function getLastTournamentsResOld($number = 10) {
     $sql = "select t1.*, (SELECT GROUP_CONCAT(Title ORDER BY Number SEPARATOR '::') FROM {%1\$s} t2 WHERE t2.ParentId=t1.Id GROUP BY t2.ParentId  ) tours FROM {%1\$s} t1 WHERE t1.Type='Ч'  ORDER BY t1.CreatedAt DESC, t1.PlayedAt ASC, t1.FileName ASC";
     $sql = sprintf($sql, self::TOURNAMENT_TABLE);
     $count_sql = sprintf("SELECT count(*) FROM {%1\$s} WHERE Type='Ч'", self::TOURNAMENT_TABLE);
     return pager_query($sql,$number, 0, $count_sql);
-
   }
-  public function getSphinxSearchRes ($ids) {
+
+    public function getLastTournamentsRes($number = 10) {
+        $sql = "SELECT t1.* FROM {%1\$s} t1 WHERE t1.Type='Ч'  
+          ORDER BY t1.CreatedAt DESC, t1.PlayedAt ASC, t1.FileName ASC";
+        $sql = sprintf($sql, self::TOURNAMENT_TABLE);
+        $count_sql = sprintf("SELECT count(*) FROM {%1\$s} WHERE Type='Ч'", self::TOURNAMENT_TABLE);
+        return pager_query($sql,$number, 0, $count_sql);
+
+    }
+
+    public function getSphinxSearchRes ($ids) {
 /*    $sql="SELECT
       t.FileName as tourFileName,
       t1.FileName as tournamentFileName,

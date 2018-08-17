@@ -1,23 +1,24 @@
-<?php if ($packages) : 
+<?php if ($packages) :
 
 ?>
 <table class="last_packages">
 <tr>  <th>Название, дата</th>
-<?php if (!$mobile) : ?>
-<th style="width:100px;">Туры</th>
-<?php endif; ?>
 
 <th>Добавлено</th></tr>
 <?php foreach ($packages as $package) : ?>
-<?php $tours = $package->getToursList();?>
   <tr class="<?php print $i++%2?'even':'odd';?>">
-    <td><?php print $tours?$package->getHtmlLinkForList(true, array('rel'=>'nofollow')):$package->getHtmlLinkForList( true );?></td>
-<?php if (!$mobile) : ?>
-    <td><?php print $tours;?></td>
-<?php endif; ?>
+    <td><?php print $tours?$package->getHtmlLinkForList(true, array('rel'=>'nofollow')):$package->getHtmlLinkForList( true );?><?php
+        $user = $package->getUser();
+        if ($user) :
+    ?>, by <?= $user->name ?>
+    <?php  endif; ?>
+    </td>
 
-    <td><?php print $package->getCreatedAt();?></td>
-
+    <td><?php
+        $date = new DateTime($package->getCreatedAt());
+        ini_set('display_errors', 1);
+        print $date->format('d.m.Y');
+    ?></td>
   </tr>
 <?php endforeach;?>
 </table>

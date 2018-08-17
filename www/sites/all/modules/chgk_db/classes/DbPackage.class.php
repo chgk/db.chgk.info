@@ -127,6 +127,15 @@ class DbPackage {
      return $this->getTitle();
   }
 
+  public function getUser()
+  {
+      if (!$this->tour->ProcessedBy) {
+          return null;
+      }
+
+      return user_load(['uid' => $this->tour->ProcessedBy]);
+  }
+
   
   public function getLongTitle() {
     return $this->getTitle();

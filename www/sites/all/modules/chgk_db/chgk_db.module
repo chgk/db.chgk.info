@@ -1091,7 +1091,7 @@ function chgk_db_get_unsorted_pre_publish_text($node)
       ' текстовый идентификатор, заканчивающийся на "_u"';
   }
 
-  return drupal_get_form('chgkdb_publish_form');
+  return drupal_get_form('chgkdb_publish_form', $node);
 
 }
 
@@ -1336,7 +1336,7 @@ function chgk_db_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0
 
 function chgk_db_last() {
   $output = '';
-  $packageNumber = 100;
+  $packageNumber = 20;
   if (arg(1)=='mobile') $packageNumber = 10;
   $instance = new DbDatabase();
   $res = $instance->getLastTournamentsRes($packageNumber);
@@ -1344,6 +1344,7 @@ function chgk_db_last() {
   drupal_set_title($title);
   while ($row = $instance->fetch_row($res)) {
     $package = DbPackage::newFromRow($row);
+
     $packages[] = $package;
   }
   if ($packages) {
@@ -1579,8 +1580,7 @@ function chgk_db_exit($destination = NULL) {
   }
 }
 
-function chgkdb_publish_form() {
-  $node = node_load(arg(1));
+function chgkdb_publish_form($form_state, $node) {
   $form = [];
   $form['publish'] = [
     '#name' => 'publish',
@@ -1596,7 +1596,7 @@ function chgkdb_publish_form() {
   }
   $form['nid'] = [
     '#type' => 'value',
-    '#value' => arg(1)
+    '#value' => $node->nid
   ];
 
   return $form;

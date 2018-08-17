@@ -230,13 +230,15 @@ class DbUnsorted {
         }
           $api = variable_get('chgk_api', 'http://api.baza-voprosov.ru/');
           $sourceText = $this->getSourceText();
+          $data = ['text' => $sourceText, 'outputFormat' => 'json', 'textId' => $textId, 'processedBy' => (int)$this->node->uid];
           $r = drupal_http_request(
               $api.'questions/validate',
               ['Content-type' => 'application/json'],
               'POST',
-              json_encode(['text' => $sourceText, 'outputFormat' => 'json', 'textId' => $textId])
+              json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)
           );
           $data = json_decode($r->data);
+
           if ($this->isPublishedByUser()) {
             $r = drupal_http_request(
               $api . 'packages/'.$textId,
@@ -253,8 +255,9 @@ class DbUnsorted {
             );
 
           }
+
           if ($r->code>=400) {
-            drupal_set_message('Не удалось опубликовать', 'error');
+            drupal_set_message('Не удалось опубликовать: '.print_r($r->data,1), 'error');
             drupal_goto('node/'.$this->node->nid);
           }
           if ($r->code < 300 ) {

@@ -1,4 +1,8 @@
 cvsupdate/baza
 cvsupdate/dump
 cvsupdate/dict
+cvsupdate/Makefile
+www/sounds
+www/images
+www/attachments
 .idea
