@@ -261,4 +261,7 @@ $conf['memcache_bins'] = array(
   'users'         => 'default'
 );
 
+$conf['chgk_db'] = 'chgk';
+$conf['sphinx_index'] = 'chgk';
+
 require_once("db_settings.php");

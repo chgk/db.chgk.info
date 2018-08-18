@@ -1,9 +1,9 @@
 <?php
 
-$conf['chgk_db'] = 'chgk';
-$conf['sphinx_index'] = 'chgk';
+#$conf['chgk_db'] = 'chgk';
+#$conf['sphinx_index'] = 'chgk';
 $conf['sphinx_host'] = 'localhost';
-$conf['sphinx_port'] = 9312;
+#$conf['sphinx_port'] = 9312;
 
 $conf['main_site'] = 'https://db.chgk.info';
 $conf['image_domain'] = '';

@@ -5,4 +5,6 @@ cvsupdate/Makefile
 www/sounds
 www/images
 www/attachments
+www/sites/default/files
+www/sites/default/settings.php
 .idea
