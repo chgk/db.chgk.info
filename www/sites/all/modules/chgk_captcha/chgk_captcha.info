@@ -1,0 +1,4 @@
+; $Id$
+name = Каптча для ЧГК
+package = ЧГК
+core = 6.x

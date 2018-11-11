@@ -600,6 +600,7 @@ function mobile_tools_devicecapability($capability) {
  *  e.g. domain.com becomes www.domain.com . this is because sometimes both www.domain.com and domain.com are the same
  */
 function mobile_tools_prepare_url($url) {
+	return $url; // ADDED BY R7 -- strange buggy function;
   $_url = parse_url($url);
   $_url = $url['host'];
   $_url = explode(".", $_url);

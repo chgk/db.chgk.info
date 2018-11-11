@@ -1,0 +1,149 @@
+<?php
+/*
+ * Control who can log in to a Drupal site
+ * Developed by Mike C aka budda / Ixis IT www.ixis.co.uk
+ */
+
+/**
+ * login_disable_menu function.
+ * 
+ * @access public
+ * @return void
+ */
+function login_disable_menu() {
+  $items = array();
+
+  $items['admin/user/logindisable'] = array(
+    'title' => 'Login Disable',
+    'description' => 'Disable the login form & access for certain user roles.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('login_disable_settings_form'),
+    'access arguments' => array('administer permissions'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  return $items;
+}
+
+
+/**
+ * login_disable_perm function.
+ * 
+ * @access public
+ * @return void
+ */
+function login_disable_perm() {
+  return array('bypass disabled login');
+}
+
+
+/**
+ * login_disable_form_user_login_block_alter function.
+ * 
+ * @access public
+ * @param mixed &$form
+ * @param mixed &$form_state
+ * @return void
+ */
+function login_disable_form_user_login_block_alter(&$form, &$form_state) {
+  login_disable_form_user_login_alter($form, $form_state);
+}
+
+
+/**
+ * login_disable_form_user_login_alter function.
+ * 
+ * @access public
+ * @param mixed &$form
+ * @param mixed &$form_state
+ * @return void
+ */
+function login_disable_form_user_login_alter(&$form, &$form_state) {
+  static $already_checked;
+   
+  $key = variable_get('login_disable_key', 'admin');
+  
+  $active = array_filter(variable_get('login_disable_is_active', array()));
+  if (isset($active['active'])) {
+
+    // Stop the login form from working if no key is specified
+    if (!array_key_exists($key, $_GET)) {
+    
+      $form['name']['#disabled'] = 'disabled';
+      $form['pass']['#disabled'] = 'disabled';
+      unset($form['submit']);
+      $form['#validate'][] = 'login_disable_form_validate';
+    
+      if (!$already_checked) {
+        drupal_set_message(variable_get('login_disable_message', 'Member logins have been temporarily disabled. Please try again later.'), 'warning');
+        $already_checked = true;
+      }
+    }
+  }
+}
+
+
+/**
+ * login_disable_user function.
+ * 
+ * @access public
+ * @param mixed $op
+ * @param mixed &$edit
+ * @param mixed &$account
+ * @param mixed $category. (default: NULL)
+ * @return void
+ */
+function login_disable_user($op, &$edit, &$account, $category = NULL) {
+  $active = array_filter(variable_get('login_disable_is_active', array()));
+
+  if ($op == 'login' && isset($active['active'])) {
+  
+    // If user is not allowed to bypass then log them out
+    if (user_access('bypass disabled login') == FALSE) {     
+      drupal_set_message(variable_get('login_disable_message', 'Member logins have been temporarily disabled. Please try again later.'), 'warning');
+      user_logout();
+      exit;
+    }
+  }
+}
+
+
+/**
+ * login_disable_settings_form function.
+ * Settings form for configurable options.
+ * 
+ * @access public
+ * @return void
+ */
+function login_disable_settings_form() {
+  $form = array();
+  
+  $form['login_disable_is_active'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Prevent user login',
+    '#description' => t('When active the user login form will be disabled for everyone. For roles granted bypass rights they must use the access key defined below.'),
+    '#options' => array('active' => t('Prevent unauthorised users logging in to the site')),
+    '#default_value' => variable_get('login_disable_is_active', array()),
+  );
+  
+  $form['login_disable_key'] = array(
+    '#title' => t('Access Key'),
+    '#description' => t('Adding this word to the end of the @url url will allow access to the login form whilst it is disabled.', array('@url' => 'user/login?' . variable_get('login_disable_key', 'admin'))),
+    '#type' => 'textfield',
+    '#size' => 10,
+    '#default_value' => variable_get('login_disable_key', 'admin'),
+  );
+  //!@todo validate key string
+
+  $form['login_disable_message'] = array(
+    '#title' => t('End-user message when login is disabled'),
+    '#description' => t('Adding this word to the end of the @url url will allow access to the login form.', array('@url' => 'user/login?' . variable_get('login_disable_key', 'admin'))),
+    '#type' => 'textfield',
+    '#size' => 80,
+    '#default_value' => variable_get('login_disable_message', 'Member logins have been temporarily disabled. Please try again later.'),
+  );
+
+  $form = system_settings_form($form);
+  
+  return $form;
+}

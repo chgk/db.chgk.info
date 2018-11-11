@@ -1,0 +1,282 @@
+# $Id: ru.po,v 1.8 2010/10/06 19:35:51 romka Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  vk_openapi.admin.inc: n/a
+#  vk_openapi.module: n/a
+#  vk_openapi.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-10-03 22:25+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: vk_openapi.admin.inc:8
+msgid "vKontakte API settings"
+msgstr "Настройки ВКонтакте API"
+
+#: vk_openapi.admin.inc:15
+msgid "Application ID"
+msgstr "ID приложения"
+
+#: vk_openapi.admin.inc:16
+msgid "Enter your Application ID"
+msgstr "Введите ID вашего приложения ВКонтакте"
+
+#: vk_openapi.admin.inc:22
+msgid "Secret key"
+msgstr "Защищенный ключ"
+
+#: vk_openapi.admin.inc:23
+msgid "Enter your secret key"
+msgstr "Введите ваш защищенный ключ"
+
+#: vk_openapi.admin.inc:29
+msgid "Site URL"
+msgstr "Адрес сайта"
+
+#: vk_openapi.admin.inc:35
+msgid "Base URL"
+msgstr "Базовый домен"
+
+#: vk_openapi.admin.inc:41
+msgid "Redirect URL"
+msgstr ""
+
+#: vk_openapi.admin.inc:47
+msgid "Show vKontakte button on login form"
+msgstr "Выводить кнопку входа через ВКонтакте в форме авторизации"
+
+#: vk_openapi.admin.inc:50
+msgid "Do not add vKontakte button to login form"
+msgstr "Не выводить кнопку входа через ВКонтакте в форме авторизации"
+
+#: vk_openapi.admin.inc:51
+msgid "Add vKontakte button to login form"
+msgstr "Выводить кнопку входа через ВКонтакте в форме авторизации"
+
+#: vk_openapi.admin.inc:57
+msgid "Frequency of user data refresh"
+msgstr "Частота обновления данных пользователя"
+
+#: vk_openapi.admin.inc:60
+msgid "1 minute"
+msgstr "1 минута"
+
+#: vk_openapi.admin.inc:61
+msgid "5 minutes"
+msgstr "5 минут"
+
+#: vk_openapi.admin.inc:62
+msgid "15 minutes"
+msgstr "15 минут"
+
+#: vk_openapi.admin.inc:63
+msgid "1 hour"
+msgstr "1 час"
+
+#: vk_openapi.admin.inc:69
+msgid "New user settings"
+msgstr "Настройки нового пользователя"
+
+#: vk_openapi.admin.inc:76
+msgid "Mask for new user name."
+msgstr "Маска имени нового пользователя"
+
+#: vk_openapi.admin.inc:77
+msgid "You may use following tokens: %first_name, %last_name, %nickname (and %nickname_lq, %nickname_rq for quotes)."
+msgstr "Вы можете использовать следующие маски: %first_name, %last_name, %nickname (и %nickname_lq, %nickname_rq для кавычек)."
+
+#: vk_openapi.admin.inc:83
+msgid "Left quote for nickname."
+msgstr "Левая кавычка для никнейма"
+
+#: vk_openapi.admin.inc:89
+msgid "Right quote for nickname."
+msgstr "Правая кавычка для никнейма"
+
+#: vk_openapi.admin.inc:95
+msgid "Allow users unite accounts."
+msgstr "Позволять пользователям объединять аккаунт созданные с помощью кнопки ВКонтакте с существующим аккаунтом"
+
+#: vk_openapi.admin.inc:96
+msgid "Allow users unite own vkontakte account account on Drupal-site."
+msgstr "Позволять пользователям объединять аккаунт созданные с помощью кнопки ВКонтакте с существующим аккаунтом"
+
+#: vk_openapi.admin.inc:102
+msgid "Oblige users to enter e-mail."
+msgstr "Обязать пользователей указывать e-mail"
+
+#: vk_openapi.admin.inc:103
+msgid "If checked then user will receive message with request to enter e-mail."
+msgstr "Если отмечено, пользователь не сможет войти на сайт, пока не укажет свой e-mail"
+
+#: vk_openapi.admin.inc:113
+msgid "Use vkontakte avatar"
+msgstr "Использовать аватар из ВКонтакте"
+
+#: vk_openapi.admin.inc:116
+msgid "Don't use"
+msgstr "Не использовать"
+
+#: vk_openapi.admin.inc:117
+msgid "Use small avatar"
+msgstr "Испольховать маленький аватар"
+
+#: vk_openapi.admin.inc:118
+msgid "Use medium avatar"
+msgstr "Испольховать средний аватар"
+
+#: vk_openapi.admin.inc:119
+msgid "Use big avatar"
+msgstr "Испольховать большой аватар"
+
+#: vk_openapi.admin.inc:122
+msgid "You should enable pictures support on <a href=\"@usp\">user settings page</a>."
+msgstr "Вы должны включить поддержку аватаров <a href=\"@usp\">на странице настроек</a>."
+
+#: vk_openapi.admin.inc:126
+msgid "None"
+msgstr "Нет"
+
+#: vk_openapi.admin.inc:133
+msgid "Role for new vkontakte user"
+msgstr "Роль для нового пользователя"
+
+#: vk_openapi.admin.inc:140
+msgid "You can't use vkontakte avatars because  your PHP don't support <a href=\"http://ru2.php.net/curl\">CURL functions</a>."
+msgstr "Вы не можете использовать аватары ВКонтакте так как ваша версия PHP не поддерживает <a href=\"http://ru2.php.net/curl\">функции CURL</a>."
+
+#: vk_openapi.admin.inc:146
+msgid "Time for e-mail confirmation"
+msgstr "Время ожидания подверждения e-mail"
+
+#: vk_openapi.admin.inc:149
+msgid "1 day"
+msgstr "1 день"
+
+#: vk_openapi.admin.inc:150
+msgid "7 days"
+msgstr "1 неделя"
+
+#: vk_openapi.admin.inc:151
+msgid "1 month"
+msgstr "1 месяц"
+
+#: vk_openapi.admin.inc:152
+msgid "Never"
+msgstr "Никогда"
+
+#: vk_openapi.module:251
+msgid "User create error"
+msgstr "Ошибка пр создании пользователя"
+
+#: vk_openapi.module:265
+msgid "New user !name successfully created. Now you should enter your e-mail"
+msgstr "Новый пользователь !name успешно создан. Вы должны указать свой email."
+
+#: vk_openapi.module:291
+msgid "!name, you successfully logged in via vKontakte account."
+msgstr "!name, вы успешно вошли в систему через свой аккаунт ВКонтакте"
+
+#: vk_openapi.module:420
+msgid "Error connecting to vkontakte.ru server"
+msgstr "Ошибка соединения с сервером ВКонтакте"
+
+#: vk_openapi.module:430
+msgid "If you already have account you can <a href=\"@unite\">unite their</a>. <a href=\"@show\">Dont show this message again.</a>"
+msgstr "Если у вас уже есть аккаунт вы можете <a href=\"@unite\">объединить его с текущим</a>. <a href=\"@show\">Не показывать это сообщение снова.</a>"
+
+#: vk_openapi.module:436
+msgid "Accounts united! Old user !old_user disabled, new user is !new_user"
+msgstr "Аккаунты объединены. Старый аккаунт !old_user выключен, новый пользователь: !new_user"
+
+#: vk_openapi.module:449
+msgid "You can't unite your account"
+msgstr "Вы не можете объединять аккаунты"
+
+#: vk_openapi.module:457
+msgid "Data saved"
+msgstr "Данные сохранены"
+
+#: vk_openapi.module:464
+msgid "Username"
+msgstr "Имя пользователя"
+
+#: vk_openapi.module:467
+msgid "Using this form you can unite your vkontakte.ru account and old account from this site."
+msgstr "Используя эту форму, вы можете объединить ваш аккаунт ВКонтакте с аккаунтом на этом сайте"
+
+#: vk_openapi.module:473
+msgid "Password"
+msgstr "Пароль"
+
+#: vk_openapi.module:481;550
+msgid "Submit"
+msgstr "Отправить"
+
+#: vk_openapi.module:491
+msgid "Incorrect username or password"
+msgstr "Неправильное имя пользователя или пароль"
+
+#: vk_openapi.module:544
+msgid "Enter your e-mail."
+msgstr "Введите ваш e-mail"
+
+#: vk_openapi.module:559
+msgid "Wrong e-mail"
+msgstr "Неверный e-mail"
+
+#: vk_openapi.module:573
+msgid "A confirmation email has been sent to your new email address. You must follow the link provided in that email within 24 hours in order to confirm the change to your account email address."
+msgstr "На ваш почтовый ящик отправлено письмо. Вы должны перейти по ссылке в письме, иначе ваш аккаунт будет заблокирован"
+
+#: vk_openapi.module:576
+msgid "Error while sending confirmation e-mail"
+msgstr "Ошибка при отправлении письма"
+
+#: vk_openapi.module:584
+msgid "Account details for !username at !site"
+msgstr "Информация о пользователе !username на !site"
+
+#: vk_openapi.module:585
+msgid "!username,\n\nThank you for registering at !site. Now you should confirm your e-mail by clicking on this link or copying and pasting it in your browser:\n\n!confirm_url"
+msgstr "!username,\n\nСпасибо за регистрацию на !site. теперь вы должны подтвердить ваш e-mail кликнув по этой сслке или скопировав и вставив её в окно браузера:\n\n!confirm_url"
+
+#: vk_openapi.module:605
+msgid "E-mail succesfully confirmed"
+msgstr "E-mail успешно подтвержден"
+
+#: vk_openapi.module:612
+msgid "E-mail confirmation error"
+msgstr "Ошибка подтверждения адреса электронной почты"
+
+#: vk_openapi.module:639
+msgid "You already unite your account with <a href=\"!url\">vkontakte.ru account</a>."
+msgstr "Вы оже объединили вашу учетную запись с <a href=\"!url\">учетной записью на vkontakte.ru</a>."
+
+#: vk_openapi.module:643
+msgid "You can unite your current account with your vkontakte.ru account:"
+msgstr "Вы можете объединить ваш аккаунт с аккаунтом на vkontakte.ru:"
+
+#: vk_openapi.module:10 vk_openapi.info:0
+msgid "vKontakte OpenAPI"
+msgstr "ВКонтакте OpenAPI"
+
+#: vk_openapi.module:64 vk_openapi.info:0
+msgid "VK"
+msgstr "ВКонтакте"
+
+#: vk_openapi.info:0
+msgid "Allow users to login using their vKontakte accounts"
+msgstr "Позволить пользователям входить в систему с помощью аккаунтов ВКонтакте"
+

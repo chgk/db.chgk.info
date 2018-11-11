@@ -1,0 +1,11 @@
+; $Id: vk_share.info,v 1.3 2010/10/06 19:35:51 romka Exp $
+name = VKontakte share button
+description = "Share content of your site on vkontakte.ru"
+package = "VK"
+core = 6.x
+; Information added by drupal.org packaging script on 2010-10-06
+version = "6.x-1.0-beta1"
+core = "6.x"
+project = "vk_openapi"
+datestamp = "1286394066"
+
