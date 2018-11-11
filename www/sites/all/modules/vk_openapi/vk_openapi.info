@@ -1,0 +1,12 @@
+; $Id: vk_openapi.info,v 1.13 2010/10/06 19:35:51 romka Exp $
+name = vKontakte OpenAPI
+description = Allow users to login using their vKontakte accounts
+package = "VK"
+php = 5.2
+core = "6.x"
+; Information added by drupal.org packaging script on 2010-10-06
+version = "6.x-1.0-beta1"
+core = "6.x"
+project = "vk_openapi"
+datestamp = "1286394066"
+

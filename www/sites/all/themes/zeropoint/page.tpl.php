@@ -54,7 +54,7 @@ window.google_analytics_uacct = "UA-17788280-2";
 <div id="headimg">
 
 <div id="above" class="clearfix">
-  <a rel="nofollow" href="http://pda.baza-voprosov.ru/?device=mobile">Мобильная версия</a><?php if ($above): ?><?php print $above; ?><?php endif; ?>
+  <?php if ($above): ?><?php print $above; ?><?php endif; ?>
 </div>
 
 <div id="header" class="clearfix">

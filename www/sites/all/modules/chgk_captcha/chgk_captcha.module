@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * Implementation of hook_captcha().
+ */
+function chgk_captcha_captcha($op, $captcha_type = '') {
+  switch ($op) {
+    case 'list':
+      return array('ЧГК');
+      break;
+
+    case 'generate':
+      if ($captcha_type == 'ЧГК') {
+        $result = array();
+        $answer = mt_rand(1, 20);
+        $x = mt_rand(1, $answer);
+        $y = $answer - $x;
+        $result['solution'] = ($answer+2).'';
+        // Build challenge widget.
+        // Note that we also use t() for the math challenge itself. This makes
+        // it possible to 'rephrase' the challenge a bit through localization
+        // or string overrides.
+        $result['form']['captcha_response'] = array(
+          '#type' => 'textfield',
+          '#title' => 'Защита от роботов',
+          '#description' => t('Решите этот несложный пример. Вы должны видеть три слагаемых. Если слагаемых два, то прибавьте к сумме 2.'),
+          '#field_prefix' => "<span class=\"chgk_db-math\">$x + $y</span> = ",
+          '#size' => 4,
+          '#maxlength' => 2,
+          '#required' => TRUE,
+        );
+        return $result;
+      }
+      break;
+  }
+}

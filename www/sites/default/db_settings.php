@@ -1,9 +1,32 @@
 <?php
 
-#$conf['chgk_db'] = 'chgk';
-#$conf['sphinx_index'] = 'chgk';
-$conf['sphinx_host'] = 'localhost';
-#$conf['sphinx_port'] = 9312;
+$update_free_access = FALSE;
+
+ini_set('arg_separator.output',     '&amp;');
+ini_set('magic_quotes_runtime',     0);
+ini_set('magic_quotes_sybase',      0);
+ini_set('session.cache_expire',     200000);
+ini_set('session.cache_limiter',    'none');
+ini_set('session.cookie_lifetime',  2000000);
+ini_set('session.gc_maxlifetime',   200000);
+ini_set('session.save_handler',     'user');
+ini_set('session.use_cookies',      1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.use_trans_sid',    0);
+ini_set('url_rewriter.tags',        '');
+
+$conf['default_theme'] = 'chgkdb_mobile';
+$conf['cache_inc'] = './sites/all/modules/memcache/memcache.inc';
+
+$conf['memcache_bins'] = array(
+  'cache'         => 'default',
+  'cache_filter'  => 'default',
+  'cache_menu'    => 'default',
+  'cache_page'    => 'default',
+  'session'       => 'default',
+  'users'         => 'default'
+);
+
 
 $conf['main_site'] = 'https://db.chgk.info';
 $conf['image_domain'] = '';

@@ -1,1 +1,0 @@
-For installation instructions refer to http://drupal.org/node/303203.
