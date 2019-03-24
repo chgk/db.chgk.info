@@ -1283,7 +1283,7 @@ function chgk_db_search_box_form_submit($form, &$form_state) {
 
 function chgk_db_unsorted() {
   $result = pager_query(db_rewrite_sql('SELECT n.nid, n.sticky, n.created FROM {node} n 
-    LEFT JOIN {unsorted} u ON (u.nid=n.nid) WHERE n.status = 1 and n.type="unsorted" and
+    LEFT JOIN {unsorted} u ON (u.vid=n.vid) WHERE n.status = 1 and n.type="unsorted" and
     u.archived=0 ORDER BY n.sticky DESC, n.created DESC'), 200);
 
   $output = '';
