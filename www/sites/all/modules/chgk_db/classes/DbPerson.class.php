@@ -96,6 +96,7 @@ class DbPerson {
         }
       }
 
+      krsort($this->years);
     }
 
   public function getNick() {
