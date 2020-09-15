@@ -208,7 +208,10 @@ class DbField {
     $this->html=preg_replace_callback('/\(pic: ([^\)]*)\)/', function ($matches) {
         return sprintf('<br/><img src="%s"><br/>', $this->getImageUrl($matches[1]));
     }, $this->html);
-    $this->addSoundsToHtml();
+#    $this->addSoundsToHtml();
+    $this->html=preg_replace_callback('/\(aud: ([^\)]*)\)/', function ($matches) {
+        return sprintf('<br/>'.self::MP3_PLAYER_TEMPLATE, $this->getSoundUrl($matches[1]));
+    }, $this->html);
     if ($this->getSearchString()) {
         $this->highLight();
     }
@@ -217,6 +220,16 @@ class DbField {
   protected function getImageUrl( $name  ) {
     if ( preg_match( '/^\d{8}/', $name ) ) {
       $result =  $this->getImageBaseUrl()."/".$name;
+    } elseif ( $attachment = $this->parent->getAttachment( $name ) ) {
+          $result = url( $attachment->filepath );
+    }
+    if ( !$result ) $result = $name;
+    return $result;
+  }
+  
+  protected function getSoundUrl( $name  ) {
+    if ( preg_match( '/^\d{8}/', $name ) ) {
+      $result =  $this->getSoundsBaseUrl()."/$1";
     } elseif ( $attachment = $this->parent->getAttachment( $name ) ) {
           $result = url( $attachment->filepath );
     }

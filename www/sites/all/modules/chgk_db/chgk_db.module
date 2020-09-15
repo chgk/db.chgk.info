@@ -627,8 +627,8 @@ function unsorted_form(&$node) {
       '#type' => 'textfield',
       '#title' => t('Текстовый идентификатор'),
       '#default_value' => isset($node->text_id) ? $node->text_id : '',
-      '#size' => 8,
-      '#maxlength' => 8,
+      '#size' => 13,
+      '#maxlength' => 13,
       '#description' => 'Если вы собираетесь опубликовать пакет, то значение поля должно заканчиваться на "_u".',
       '#attributes' => ['style' => 'width:70px;display:inline-block'],
     ];

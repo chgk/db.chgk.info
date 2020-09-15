@@ -95,9 +95,6 @@ class DbUnsorted {
 
   public function getCheckedHTML() {
       $text = $this->getSourceText();
-      if (!preg_match('/^(Чемпионат|Пакет):/u', $text)) {
-          $text = "Чемпионат:\n".$this->node->title."\n\n".$this->getSourceText();
-      }
       $api = variable_get('chgk_api', 'http://api.baza-voprosov.ru/');
       $r = drupal_http_request($api.'questions/validate', ['Content-type' => 'application/json'], 'POST',
           json_encode(['text'=>$text, 'outputFormat' => 'html']));
